@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 
 # Definir directorios de inclusión
-#include_directories(include)
+include_directories(include)
 
 # Buscar Boost
 #find_package(Boost REQUIRED COMPONENTS system filesystem)
@@ -20,8 +20,8 @@ find_package(ODBC REQUIRED)
 # Archivos fuente
 set(SOURCES
     main.cpp
-#    src/ODBC/ODBCController.cpp
-#    src/Dataset/Dataset.cpp
+    include/SQL/SQL.cpp
+    include/Dataset/Dataset.cpp
 )
 
 # Crear el ejecutable
