@@ -5,27 +5,29 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 
 # Definir directorios de inclusión
-include_directories(include)
+#include_directories(include)
 
 # Buscar Boost
-find_package(Boost REQUIRED COMPONENTS system filesystem)
-include_directories(${Boost_INCLUDE_DIRS})
+#find_package(Boost REQUIRED COMPONENTS system filesystem)
+#include_directories(${Boost_INCLUDE_DIRS})
 
 # Buscar ODBC
 find_package(ODBC REQUIRED)
 
 # Buscar cppgraphqlgen
-find_package(cppgraphqlgen REQUIRED)
+#find_package(cppgraphqlgen REQUIRED)
 
 # Archivos fuente
 set(SOURCES
-    src/main.cpp
-    src/ODBC/ODBCController.cpp
-    src/Dataset/Dataset.cpp
+    main.cpp
+#    src/ODBC/ODBCController.cpp
+#    src/Dataset/Dataset.cpp
 )
 
 # Crear el ejecutable
 add_executable(server ${SOURCES})
 
 # Enlazar librerías
-target_link_libraries(server odbc ${Boost_LIBRARIES} cppgraphqlgen)
+#target_link_libraries(server odbc ${Boost_LIBRARIES} cppgraphqlgen)
+target_link_libraries(server odbc)
+
