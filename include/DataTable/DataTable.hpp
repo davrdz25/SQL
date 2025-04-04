@@ -2,7 +2,7 @@
 #include <map>
 
 
-class Dataset {
+class DataTable {
     private:
         std::vector<std::map<std::string, std::string>> data;
     

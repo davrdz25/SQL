@@ -1,5 +1,5 @@
 #include "include/SQL/SQL.hpp"
-#include "include/Dataset/Dataset.hpp"
+#include "include/DataTable/DataTable.hpp"
 
 int main() {
     try {
@@ -9,14 +9,14 @@ int main() {
         controller.execute();
         auto results = controller.fetchResults();
 
-        Dataset dataset;
-        dataset.setData(results);
+        DataTable DataTable;
+        DataTable.setData(results);
 
-        // Accediendo a los datos como dataset[i]["ColumnName"]
-        for (int i = 0; i < dataset.size(); ++i) {
+        // Accediendo a los datos como DataTable[i]["ColumnName"]
+        for (int i = 0; i < DataTable.size(); ++i) {
             std::cout << "Row " << i << ":" << std::endl;
-            std::cout << "ItemName: " << dataset[i]["ItemName"] << std::endl;
-            std::cout << "ItemCode: " << dataset[i]["ItemCode"] << std::endl;
+            std::cout << "ItemName: " << DataTable[i]["ItemName"] << std::endl;
+            std::cout << "ItemCode: " << DataTable[i]["ItemCode"] << std::endl;
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

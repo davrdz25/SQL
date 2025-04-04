@@ -21,7 +21,7 @@ find_package(ODBC REQUIRED)
 set(SOURCES
     main.cpp
     include/SQL/SQL.cpp
-    include/Dataset/Dataset.cpp
+    include/DataTable/DataTable.cpp
 )
 
 # Crear el ejecutable
