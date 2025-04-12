@@ -1,3 +1,4 @@
+#pragma one
 #include <iostream>
 #include <sql.h>
 #include <sqlext.h>
@@ -12,15 +13,18 @@ class SQL {
         SQLHENV henv;
         SQLHDBC hdbc;
         SQLHSTMT hstmt;
-    
-        void extractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type);
-    
+       
+
     public:
         SQL();
         ~SQL();
-        void connect(const std::string& dsn, const std::string& dbName, const std::string& user, const std::string& password);
-        void prepareStatement(const std::string& query);
-        void execute();
-        std::vector<std::map<std::string, std::string>> fetchResults();
+        void Execute();
+        void CloseConnection();
+        void ExtractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type);
+        void PrepareStatement(const std::string& query);
+        void RunQuery(const std::string& query);
+        void Connect(const std::string& dsn, const std::string& dbName, const std::string& user, const std::string& password);
+        bool RunStatement(const std::string& query);
+        std::vector<std::map<std::string, std::string>> FetchResults(const std::string& query);
     };
     

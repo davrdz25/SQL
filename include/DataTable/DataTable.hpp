@@ -7,7 +7,7 @@ class DataTable {
         std::vector<std::map<std::string, std::string>> data;
     
     public:
-        void setData(const std::vector<std::map<std::string, std::string>>& newData);
+        void Fill(const std::vector<std::map<std::string, std::string>>& newData);
         std::map<std::string, std::string>& operator[](int index);
-        int size() const ;
+        int RowsCount() const ;
     };

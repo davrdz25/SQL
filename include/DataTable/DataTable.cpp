@@ -1,6 +1,6 @@
 #include "DataTable.hpp"
 
-void DataTable::setData(const std::vector<std::map<std::string, std::string>> &newData)
+void DataTable::Fill(const std::vector<std::map<std::string, std::string>> &newData)
 {
     data = newData;
 }
@@ -14,7 +14,7 @@ std::map<std::string, std::string> &DataTable::operator[](int index)
     return data[index];
 }
 
-int DataTable::size() const
+int DataTable::RowsCount() const
 {
     return data.size();
 }

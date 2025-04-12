@@ -1,6 +1,6 @@
 #include "SQL.hpp"
 
-void SQL::extractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type)
+void SQL::ExtractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type)
 {
     SQLINTEGER i = 0;
     SQLINTEGER native;
@@ -33,30 +33,41 @@ SQL::~SQL()
     SQLFreeHandle(SQL_HANDLE_ENV, henv);
 }
 
-void SQL::connect(const std::string &dsn, const std::string &dbName, const std::string &user, const std::string &password)
+void SQL::Connect(const std::string &dsn, const std::string &dbName, const std::string &user, const std::string &password)
 {
-    std::string connString = "Driver={ODBC Driver 18 for SQL Server};Server=" + dsn + ";Database=" + dbName + ";UID=" + user + ";PWD=" + password + ";TrustServerCertificate=yes;APP=DebugC++";
-    SQLRETURN retcode = SQLDriverConnect(hdbc, NULL, (SQLCHAR *)connString.c_str(), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_NOPROMPT);
-
-    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+    try
     {
-        extractError("SQLConnect", hdbc, SQL_HANDLE_DBC);
-        throw std::runtime_error("Error conectando a la base de datos");
+        std::string connString = "Driver={ODBC Driver 18 for SQL Server};Server=" + dsn + ";Database=" + dbName + ";UID=" + user + ";PWD=" + password + ";TrustServerCertificate=yes;APP=DebugC++";
+        SQLRETURN retcode = SQLDriverConnect(hdbc, NULL, (SQLCHAR *)connString.c_str(), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_NOPROMPT);
+
+        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+        {
+            ExtractError("SQLConnect", hdbc, SQL_HANDLE_DBC);
+            throw std::runtime_error("Error conectando a la base de datos");
+        }
+        else 
+        {
+            std::cout << "CoNectado" << std::endl;
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        throw std::runtime_error(std::string("Error conectando a la base de datos: ") + ex.what());
     }
 }
 
-void SQL::prepareStatement(const std::string &query)
+void SQL::PrepareStatement(const std::string &query)
 {
     SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
     SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
 }
 
-void SQL::execute()
+void SQL::Execute()
 {
     SQLExecute(hstmt);
 }
 
-std::vector<std::map<std::string, std::string>> SQL::fetchResults()
+std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::string &query)
 {
     std::vector<std::map<std::string, std::string>> results;
     SQLCHAR columnName[256];
@@ -87,10 +98,42 @@ std::vector<std::map<std::string, std::string>> SQL::fetchResults()
         results.push_back(row);
     }
 
-    if (results.empty())
-    {
-        throw std::runtime_error("No hay resultados en la consulta");
-    }
-
     return results;
+}
+
+bool SQL::RunStatement(const std::string &query)
+{
+    try
+    {
+        SQLRETURN retcode;
+        SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+        retcode = SQLExecDirect(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
+
+        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+        {
+            ExtractError("RunStatement", hstmt, SQL_HANDLE_STMT);
+            throw std::runtime_error("Error al ejecutar la consulta");
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Excepción en RunStatement: " << ex.what() << std::endl;
+        throw;
+        return false;
+    }
+}
+
+void SQL::CloseConnection()
+{
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    SQLDisconnect(hdbc);
+    SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, henv);
 }

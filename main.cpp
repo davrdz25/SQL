@@ -1,23 +1,26 @@
-#include "include/SQL/SQL.hpp"
-#include "include/DataTable/DataTable.hpp"
+#include "include/GlobalEnvironment/GlobalEnvironment.hpp"
 
 int main() {
     try {
-        SQL controller;
-        controller.connect("192.168.1.253", "POS", "sa", "Development..");
-        controller.prepareStatement("SELECT ItemName, ItemCode FROM Items");
-        controller.execute();
-        auto results = controller.fetchResults();
+        GlobalEnvironment::DBServer = "192.168.1.253";
+        GlobalEnvironment::DatabaseName = "POS";
+        GlobalEnvironment::DBUser = "sa";
+        GlobalEnvironment::DBPassword = "Development..";
 
-        DataTable DataTable;
-        DataTable.setData(results);
+        std::shared_ptr<SQL> Database = std::make_shared<SQL>();
 
-        // Accediendo a los datos como DataTable[i]["ColumnName"]
-        for (int i = 0; i < DataTable.size(); ++i) {
+        GlobalEnvironment::InitDatabaseConnection(Database);
+                
+        Database->Connect(GlobalEnvironment::DBServer, GlobalEnvironment::DatabaseName, GlobalEnvironment::DBUser,GlobalEnvironment::DBPassword);
+        /* DataTable DataTable;
+        DataTable.Fill(controller.FetchResults("SELECT ItemName, ItemCode FROM Items"));
+        std::cout << DataTable.RowsCount() << std::endl;
+
+        for (int i = 0; i < DataTable.RowsCount(); ++i) {
             std::cout << "Row " << i << ":" << std::endl;
             std::cout << "ItemName: " << DataTable[i]["ItemName"] << std::endl;
-            std::cout << "ItemCode: " << DataTable[i]["ItemCode"] << std::endl;
-        }
+            std::cout << "ItemCode: " << DataTable[i]["ItemCosdde"] << std::endl;
+        } */
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
