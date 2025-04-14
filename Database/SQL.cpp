@@ -35,11 +35,11 @@ SQL::~SQL()
     SQLFreeHandle(SQL_HANDLE_ENV, henv);
 }
 
-bool SQL::Connect(const std::string &dsn, const std::string &dbName, const std::string &user, const std::string &password)
+bool SQL::Connect()
 {
     try
     {
-        std::string connString = "Driver={ODBC Driver 18 for SQL Server};Server=" + dsn + ";Database=" + dbName + ";UID=" + user + ";PWD=" + password + ";TrustServerCertificate=yes;APP=DebugC++";
+        std::string connString = "Driver={ODBC Driver 18 for SQL Server};Server=" + _ServerName + ";Database=" + _DatabaseName + ";UID=" + _UserName + ";PWD=" + _Password + ";TrustServerCertificate=" + (_TrustServerCertificate ? "yes" : "no") + ";APP=DebugC++";
         SQLRETURN retcode = SQLDriverConnect(hdbc, NULL, (SQLCHAR *)connString.c_str(), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_NOPROMPT);
 
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
@@ -131,3 +131,19 @@ bool SQL::RunStatement(const std::string &query)
         return false;
     }
 }
+
+void SQL::ServerName(const std::string& _ServerName){
+    this->_ServerName = _ServerName;
+};
+void SQL::DatabaseName(const std::string& _DatabaseName){
+    this->_DatabaseName = _DatabaseName;
+};
+void SQL::UserName(const std::string& _UserName){
+    this->_UserName = _UserName;
+};
+void SQL::Password(const std::string& _Password){
+    this->_Password = _Password;
+};
+void SQL::TrustServerCertificate(const bool& _TrustServerCertificate){
+    this->_TrustServerCertificate = _TrustServerCertificate;
+};

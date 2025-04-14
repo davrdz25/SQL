@@ -18,7 +18,7 @@ class SQL : public ISQL{
         std::string _DatabaseName;
         std::string _UserName;
         std::string _Password;
-        bool _TrustedConnection;
+        bool _TrustServerCertificate;
 
         void Execute();
         void PrepareStatement(const std::string& query);
@@ -32,7 +32,7 @@ class SQL : public ISQL{
         void DatabaseName(const std::string&);
         void UserName(const std::string&);
         void Password(const std::string&);
-        void TrustedConnection(const bool&);
+        void TrustServerCertificate(const bool&);
         bool Connect() override;
         bool RunStatement(const std::string& query) override;
         std::vector<std::map<std::string, std::string>> FetchResults(const std::string& query) override;

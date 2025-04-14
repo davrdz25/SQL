@@ -34,26 +34,32 @@ endif()
 #find_package(graphqlservice REQUIRED)
 
 # Include directories
+
+# Include directories
 include_directories(
-    ${Boost_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Database
+    ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
+    ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
+    ${CMAKE_CURRENT_SOURCE_DIR}/Services
+    ${CMAKE_CURRENT_SOURCE_DIR}/Models
+    ${CMAKE_CURRENT_SOURCE_DIR}/GlobalEnvironment
 )
 
 # Source files
-file(GLOB_RECURSE SOURCES
-    ${CMAKE_SOURCE_DIR}/main.cpp
-    ${CMAKE_SOURCE_DIR}/include/DataTable/*.cpp
-    ${CMAKE_SOURCE_DIR}/include/SQL/*.cpp
-#    ${CMAKE_SOURCE_DIR}/include/Models/**/*.cpp
-    ${CMAKE_SOURCE_DIR}/include/GlobalEnvironment/*.cpp
-#    ${CMAKE_SOURCE_DIR}/include/GraphQL/QueryResolver/*.cpp
+file(GLOB_RECURSE SRC_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/Database/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GlobalEnvironment/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
-
 # Executable
-add_executable(GraphQLServer ${SOURCES})
+add_executable(Server ${SRC_FILES})
 
 # Link libraries
-target_link_libraries(GraphQLServer
+target_link_libraries(Server
     ${Boost_LIBRARIES}
     ${ODBC_LIBRARY}
     graphqlservice
@@ -61,5 +67,5 @@ target_link_libraries(GraphQLServer
 
 # macOS: link iconv if needed
 if(APPLE)
-    target_link_libraries(GraphQLServer iconv)
+    target_link_libraries(Server iconv)
 endif()

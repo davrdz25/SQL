@@ -1,17 +1,26 @@
-#include "include/GlobalEnvironment/GlobalEnvironment.hpp"
+#include "Repositories/ItemRepository.hpp"
+#include "Services/ItemService.hpp"
 
 int main() {
     try {
-        GlobalEnvironment::DBServer = "192.168.1.253";
-        GlobalEnvironment::DatabaseName = "POS";
-        GlobalEnvironment::DBUser = "sa";
-        GlobalEnvironment::DBPassword = "Development..";
+        std::shared_ptr Database = std::make_shared<SQL>();
 
-        std::shared_ptr<SQL> Database = std::make_shared<SQL>();
+        Database->ServerName("192.168.1.253");
+        Database->UserName("sa");
+        Database->Password("Development..");
+        Database->DatabaseName("POS");
+        Database->TrustServerCertificate(true);
 
-        GlobalEnvironment::InitDatabaseConnection(Database);
-                
-        Database->Connect(GlobalEnvironment::DBServer, GlobalEnvironment::DatabaseName, GlobalEnvironment::DBUser,GlobalEnvironment::DBPassword);
+        if(Database->Connect())
+        {
+            std::cout << "Conectado" << std::endl;          
+
+        }
+        else {
+            std::cout << "No conectado" << std::endl;
+        }
+
+        std::shared_ptr itemRepository = std::make_shared<ItemRepository>(Database);
         /* DataTable DataTable;
         DataTable.Fill(controller.FetchResults("SELECT ItemName, ItemCode FROM Items"));
         std::cout << DataTable.RowsCount() << std::endl;

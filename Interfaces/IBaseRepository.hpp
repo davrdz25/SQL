@@ -5,7 +5,7 @@
 template <typename T>
 class IBaseRepository {
     public:
-        void ~IBaseRepository() = default;
+        ~IBaseRepository() = default;
         virtual std::optional<T> ReadAll() = 0;
         virtual std::optional<T> ReadByEntry(const int&) = 0;
         virtual bool Create(const T&) = 0;
