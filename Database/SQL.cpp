@@ -114,7 +114,7 @@ bool SQL::RunStatement(const std::string &query)
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         {
             ExtractError("RunStatement", hstmt, SQL_HANDLE_STMT);
-            throw std::runtime_error("Error al ejecutar la consulta");
+            throw std::runtime_error("Error al ejecutar la consulta: " + query);
             return false;
         }
         else

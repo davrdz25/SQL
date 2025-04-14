@@ -12,11 +12,22 @@ std::optional<Item> ItemRepository::ReadByCodebars(const std::string& _Codebars)
 
 };
 
+std::optional<Item> ItemRepository::ReadAll()
+{
+
+};
+
+
+std::optional<Item> ItemRepository::ReadByEntry(const int& _Entry)
+{
+
+};
+
 bool ItemRepository::Create(const Item& _Item)
 {
     try
     {
-        std::string Query = "INSERT INTO Items VALUES ((SELECT MAX(Entry) + 1 FROM Items), '" + _Item.ItemName + "', " + "'" + _Item.ItemCode + "', '" + _Item.Codebars + ", " + std::to_string(_Item.OnHand) + ")";
+        std::string Query = "INSERT INTO Items VALUES ((SELECT MAX(Entry) + 1 FROM Items), '" + _Item.ItemName + "', " + "'" + _Item.ItemCode + "', '" + _Item.Codebars + "', " + std::to_string(_Item.OnHand) + ")";
 
         if(Database_->RunStatement(Query))
         {

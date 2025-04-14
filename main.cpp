@@ -13,23 +13,17 @@ int main() {
 
         if(Database->Connect())
         {
-            std::cout << "Conectado" << std::endl;          
-
+            std::cout << "Conectado" << std::endl;  
+            
+            std::shared_ptr itemRepository = std::make_shared<ItemRepository>(Database);
+            ItemService service(itemRepository);
+    
+            Item item{0, "Item desde C++", "1234567890","ItmC++", 99.9f};
+            service.CreateItem(item);
         }
         else {
             std::cout << "No conectado" << std::endl;
         }
-
-        std::shared_ptr itemRepository = std::make_shared<ItemRepository>(Database);
-        /* DataTable DataTable;
-        DataTable.Fill(controller.FetchResults("SELECT ItemName, ItemCode FROM Items"));
-        std::cout << DataTable.RowsCount() << std::endl;
-
-        for (int i = 0; i < DataTable.RowsCount(); ++i) {
-            std::cout << "Row " << i << ":" << std::endl;
-            std::cout << "ItemName: " << DataTable[i]["ItemName"] << std::endl;
-            std::cout << "ItemCode: " << DataTable[i]["ItemCosdde"] << std::endl;
-        } */
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

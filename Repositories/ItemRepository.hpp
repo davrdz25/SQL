@@ -8,9 +8,11 @@ class ItemRepository : public IItemRepository {
     public:
         explicit ItemRepository(std::shared_ptr<SQL> Database);
 
-        ~ItemRepository();
+        ~ItemRepository(){};
         
+        std::optional<Item> ReadAll() override;
         std::optional<Item> ReadByName(const std::string&) override;
+        std::optional<Item> ReadByEntry(const int&) override;
         std::optional<Item> ReadByCodebars(const std::string&) override;
         bool Create(const Item&) override;
         bool Update(const Item&) override;
