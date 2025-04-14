@@ -13,9 +13,11 @@ void SQL::ExtractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type)
     do
     {
         ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len);
-        if (SQL_SUCCEEDED(ret))
+        if (SQL_SUCCEEDED(ret)){
             std::cerr << text << std::endl;
+        }
     } while (ret == SQL_SUCCESS);
+    
 }
 
 SQL::SQL()
@@ -33,7 +35,7 @@ SQL::~SQL()
     SQLFreeHandle(SQL_HANDLE_ENV, henv);
 }
 
-void SQL::Connect(const std::string &dsn, const std::string &dbName, const std::string &user, const std::string &password)
+bool SQL::Connect(const std::string &dsn, const std::string &dbName, const std::string &user, const std::string &password)
 {
     try
     {
@@ -43,11 +45,11 @@ void SQL::Connect(const std::string &dsn, const std::string &dbName, const std::
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         {
             ExtractError("SQLConnect", hdbc, SQL_HANDLE_DBC);
-            throw std::runtime_error("Error conectando a la base de datos");
+            return false;
         }
         else 
         {
-            std::cout << "CoNectado" << std::endl;
+            return true;
         }
     }
     catch (const std::exception &ex)
@@ -128,12 +130,4 @@ bool SQL::RunStatement(const std::string &query)
         throw;
         return false;
     }
-}
-
-void SQL::CloseConnection()
-{
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    SQLDisconnect(hdbc);
-    SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
-    SQLFreeHandle(SQL_HANDLE_ENV, henv);
 }
