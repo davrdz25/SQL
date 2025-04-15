@@ -4,17 +4,20 @@
 #include "../Repositories/ItemRepository.hpp"
 #include "../Interfaces/IItemRepository.hpp"
 
+enum Filter {
+    ItemCode,
+    ItemName,
+    Codebars
+};
+
 class ItemService {
 public:
-    explicit ItemService(std::shared_ptr<IItemRepository> repository)
-        : repository_(std::move(repository)) {};
+    explicit ItemService(std::shared_ptr<IItemRepository> repository);
 
-    bool CreateItem(const Item& item);
-
-    std::optional<Item> findItem(int id) {
-        return repository_->ReadAll();
-    }
+    bool AddItem(const Item& item);
+    std::vector<Item> SearchItem(const int&);
+    std::vector<Item> SearchItem(enum Filter, const std::string&);
 
 private:
-    std::shared_ptr<IItemRepository> repository_;
+    std::shared_ptr<IItemRepository> repository;
 };

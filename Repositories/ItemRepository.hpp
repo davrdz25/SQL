@@ -3,6 +3,7 @@
 #include <vector>
 #include "../Interfaces/IItemRepository.hpp"
 #include "../Database/SQL.hpp"
+#include "../Database/DataTable.hpp"
 
 class ItemRepository : public IItemRepository {
     public:
@@ -10,10 +11,12 @@ class ItemRepository : public IItemRepository {
 
         ~ItemRepository(){};
         
-        std::optional<Item> ReadAll() override;
-        std::optional<Item> ReadByName(const std::string&) override;
-        std::optional<Item> ReadByEntry(const int&) override;
-        std::optional<Item> ReadByCodebars(const std::string&) override;
+        std::vector<Item> ReadAll() override;
+        std::vector<Item> ReadByName(const std::string&) override;
+        std::vector<Item> ReadByEntry(const int&) override;
+        std::vector<Item> ReadByCodebars(const std::string&) override;
+        std::vector<Item> ReadByCode(const std::string&) override;
+
         bool Create(const Item&) override;
         bool Update(const Item&) override;
         bool Delete(const Item&) override;

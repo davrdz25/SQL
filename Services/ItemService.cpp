@@ -1,6 +1,9 @@
 #include "ItemService.hpp"
 
-bool ItemService::CreateItem(const Item& item){
+ItemService::ItemService(std::shared_ptr<IItemRepository> repository)
+        : repository(std::move(repository)) {};
+
+bool ItemService::AddItem(const Item& item){
     try
     {
         if(item.Codebars.length() == 0){
@@ -18,11 +21,83 @@ bool ItemService::CreateItem(const Item& item){
             return false;
         }
 
-        repository_->Create(item);
+        repository->Create(item);
+
+    }
+    catch(const std::exception& Ex)
+    {
+        std::runtime_error(Ex.what());
+        return false;
+    }
+}
+
+std::vector<Item> ItemService::SearchItem(const int& Entry)
+{
+    std::vector<Item> items;
+
+    try
+    {
+        if(Entry == 0)
+        {
+            throw std::invalid_argument("Entry must be greater than 0");
+            return items;
+        }
+
+        if(Entry < 0)
+        {
+            throw std::invalid_argument("Entry must be greater positive");
+            return items;
+        }
+
+        items = repository->ReadByEntry(Entry);
+
+        return items;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return items;
+    }
+    
+}
+
+std::vector<Item> ItemService::SearchItem(Filter filter, const std::string& Value)
+{
+    std::vector<Item> items;
+
+    try
+    {
+        if(Value == "" || Value.size() == 0)
+        {
+            throw std::invalid_argument("Value canot be empty");
+            return items;
+        }
+
+        switch (filter)
+        {
+        case ItemCode:
+            items = repository->ReadByCode(Value);
+            break;
+
+            case ItemName:
+            items = repository->ReadByName(Value);
+            break;
+
+            case Codebars:
+            items = repository->ReadByCodebars(Value);
+            break;
+        
+        default:
+            break;
+        }
+
+        return items;
 
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
+        return items;
     }
+    
 }

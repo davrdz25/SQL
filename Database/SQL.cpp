@@ -13,11 +13,11 @@ void SQL::ExtractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type)
     do
     {
         ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len);
-        if (SQL_SUCCEEDED(ret)){
+        if (SQL_SUCCEEDED(ret))
+        {
             std::cerr << text << std::endl;
         }
     } while (ret == SQL_SUCCESS);
-    
 }
 
 SQL::SQL()
@@ -47,7 +47,7 @@ bool SQL::Connect()
             ExtractError("SQLConnect", hdbc, SQL_HANDLE_DBC);
             return false;
         }
-        else 
+        else
         {
             return true;
         }
@@ -72,35 +72,54 @@ void SQL::Execute()
 std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::string &query)
 {
     std::vector<std::map<std::string, std::string>> results;
-    SQLCHAR columnName[256];
-    SQLSMALLINT columnCount;
-    SQLSMALLINT columnNameLength, nativeType, decimalDigits, nullable;
-    SQLULEN columnSize;
-    SQLRETURN retcode;
 
-    SQLNumResultCols(hstmt, &columnCount);
-
-    std::vector<std::string> columnNames;
-    for (SQLUSMALLINT i = 1; i <= columnCount; ++i)
+    try
     {
-        SQLDescribeCol(hstmt, i, columnName, sizeof(columnName), &columnNameLength, &nativeType, &columnSize, &decimalDigits, &nullable);
-        columnNames.push_back(std::string(reinterpret_cast<char *>(columnName)));
-    }
+        SQLCHAR columnName[256];
+        SQLSMALLINT columnCount;
+        SQLSMALLINT columnNameLength, nativeType, decimalDigits, nullable;
+        SQLULEN columnSize;
+        SQLRETURN retcode;
 
-    while (SQLFetch(hstmt) == SQL_SUCCESS)
-    {
-        std::map<std::string, std::string> row;
+        SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+        SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
+
+        retcode = SQLExecDirect(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
+        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+        {
+            ExtractError("RunStatement", hstmt, SQL_HANDLE_STMT);
+            throw std::runtime_error("Error al ejecutar la consulta: " + query);
+        }
+
+        SQLNumResultCols(hstmt, &columnCount);
+
+        std::vector<std::string> columnNames;
         for (SQLUSMALLINT i = 1; i <= columnCount; ++i)
         {
-            SQLCHAR value[256];
-            SQLLEN indicator;
-            retcode = SQLGetData(hstmt, i, SQL_C_CHAR, value, sizeof(value), &indicator);
-            row[columnNames[i - 1]] = (indicator != SQL_NULL_DATA) ? std::string(reinterpret_cast<char *>(value)) : "NULL";
+            SQLDescribeCol(hstmt, i, columnName, sizeof(columnName), &columnNameLength, &nativeType, &columnSize, &decimalDigits, &nullable);
+            columnNames.push_back(std::string(reinterpret_cast<char *>(columnName)));
         }
-        results.push_back(row);
-    }
 
-    return results;
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            std::map<std::string, std::string> row;
+            for (SQLUSMALLINT i = 1; i <= columnCount; ++i)
+            {
+                SQLCHAR value[256];
+                SQLLEN indicator;
+                retcode = SQLGetData(hstmt, i, SQL_C_CHAR, value, sizeof(value), &indicator);
+                row[columnNames[i - 1]] = (indicator != SQL_NULL_DATA) ? std::string(reinterpret_cast<char *>(value)) : "NULL";
+            }
+            results.push_back(row);
+        }
+        std::cout << "Tamanho desde consulta SQL " + std::to_string(results.size()) << std::endl;
+        return results;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+        return results;
+    }
 }
 
 bool SQL::RunStatement(const std::string &query)
@@ -132,18 +151,23 @@ bool SQL::RunStatement(const std::string &query)
     }
 }
 
-void SQL::ServerName(const std::string& _ServerName){
+void SQL::ServerName(const std::string &_ServerName)
+{
     this->_ServerName = _ServerName;
 };
-void SQL::DatabaseName(const std::string& _DatabaseName){
+void SQL::DatabaseName(const std::string &_DatabaseName)
+{
     this->_DatabaseName = _DatabaseName;
 };
-void SQL::UserName(const std::string& _UserName){
+void SQL::UserName(const std::string &_UserName)
+{
     this->_UserName = _UserName;
 };
-void SQL::Password(const std::string& _Password){
+void SQL::Password(const std::string &_Password)
+{
     this->_Password = _Password;
 };
-void SQL::TrustServerCertificate(const bool& _TrustServerCertificate){
+void SQL::TrustServerCertificate(const bool &_TrustServerCertificate)
+{
     this->_TrustServerCertificate = _TrustServerCertificate;
 };
