@@ -1,7 +1,7 @@
 #include "ItemRepository.hpp"
 
-ItemRepository::ItemRepository(std::shared_ptr<SQL> Database)
-    : Database_(std::move(Database)) {}
+ItemRepository::ItemRepository(std::shared_ptr<SQL> Database): Database(std::move(Database)) 
+{}
 
 std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_ItemCode)
 {
@@ -12,7 +12,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE ItemCode = '" + _ItemCode + "'";
 
-        dataTable.Fill(Database_->FetchResults(Query));
+        dataTable.Fill(Database->FetchResults(Query));
 
         if (dataTable.RowsCount() > 0)
         {
@@ -56,7 +56,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadByName(const std::string &_
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE ItemName = '" + _Name + "'";
 
-        dataTable.Fill(Database_->FetchResults(Query));
+        dataTable.Fill(Database->FetchResults(Query));
 
         if (dataTable.RowsCount() == 0)
             return std::nullopt;
@@ -97,7 +97,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCodebars(const std::strin
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE Codebars = '" + _Codebars + "'";
 
-        dataTable.Fill(Database_->FetchResults(Query));
+        dataTable.Fill(Database->FetchResults(Query));
 
         if (dataTable.RowsCount() == 0)
             return std::nullopt;
@@ -138,7 +138,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadAll()
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items";
 
-        dataTable.Fill(Database_->FetchResults(Query));
+        dataTable.Fill(Database->FetchResults(Query));
 
         if (dataTable.RowsCount() == 0)
             return std::nullopt;
@@ -180,7 +180,7 @@ std::optional<Item> ItemRepository::ReadByEntry(const int &_Entry)
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE Entry = " + std::to_string(_Entry);
 
-        dataTable.Fill(Database_->FetchResults(Query));
+        dataTable.Fill(Database->FetchResults(Query));
 
         if (dataTable.RowsCount() == 1)
         {
@@ -208,7 +208,7 @@ bool ItemRepository::Create(const Item &_Item)
     {
         std::string Query = "INSERT INTO Items VALUES ((SELECT MAX(Entry) + 1 FROM Items), '" + _Item.ItemName + "', " + "'" + _Item.ItemCode + "', '" + _Item.Codebars + "', " + std::to_string(_Item.OnHand) + ")";
 
-        if (Database_->RunStatement(Query))
+        if (Database->RunStatement(Query))
 
             return true;
 
@@ -227,7 +227,7 @@ bool ItemRepository::Update(const Item &_Item)
     {
         std::string Query = "UPDATE Items SET ItemName = '" + _Item.ItemName + "', ItemCode = '" + _Item.ItemCode + "', Codebars = '" + _Item.Codebars + "' , OnHand = " + std::to_string(_Item.OnHand) + " WHERE Entry = " + std::to_string(_Item.Entry);
 
-        if (Database_->RunStatement(Query))
+        if (Database->RunStatement(Query))
             return true;
 
         return false;
@@ -240,6 +240,7 @@ bool ItemRepository::Update(const Item &_Item)
     }
 };
 
-bool ItemRepository::Delete(const Item &_Item) {
+bool ItemRepository::Delete(const Item &_Item) 
+{
 
 };

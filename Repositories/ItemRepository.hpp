@@ -22,5 +22,5 @@ class ItemRepository : public IItemRepository {
         bool Delete(const Item&) override;
 
     private:
-        std::shared_ptr<SQL> Database_;
+        std::shared_ptr<SQL> Database;
 };
