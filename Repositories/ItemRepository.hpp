@@ -11,11 +11,11 @@ class ItemRepository : public IItemRepository {
 
         ~ItemRepository(){};
         
-        std::vector<Item> ReadAll() override;
-        std::vector<Item> ReadByName(const std::string&) override;
-        Item ReadByEntry(const int&) override;
-        std::vector<Item> ReadByCodebars(const std::string&) override;
-        std::vector<Item> ReadByCode(const std::string&) override;
+        std::optional<std::vector<Item>> ReadAll() override;
+        std::optional<std::vector<Item>> ReadByName(const std::string&) override;
+        std::optional<Item> ReadByEntry(const int&) override;
+        std::optional<std::vector<Item>> ReadByCodebars(const std::string&) override;
+        std::optional<std::vector<Item>> ReadByCode(const std::string&) override;
 
         bool Create(const Item&) override;
         bool Update(const Item&) override;
