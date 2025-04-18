@@ -30,33 +30,33 @@ bool ItemService::AddItem(const Item& item){
         return false;
     }
 }
-
-std::vector<Item> ItemService::SearchItem(const int& Entry)
+Item ItemService::SearchItem(const int& Entry)
 {
-    std::vector<Item> items;
+    Item item;
 
     try
     {
         if(Entry == 0)
         {
             throw std::invalid_argument("Entry must be greater than 0");
-            return items;
+            return item;
         }
 
         if(Entry < 0)
         {
             throw std::invalid_argument("Entry must be greater positive");
-            return items;
+            return item;
         }
 
-        items = repository->ReadByEntry(Entry);
+        if(repository)
+        item = repository->ReadByEntry(Entry);
 
-        return items;
+        return item;
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-        return items;
+        return item;
     }
     
 }
@@ -91,6 +91,11 @@ std::vector<Item> ItemService::SearchItem(Filter filter, const std::string& Valu
             break;
         }
 
+        if(items.size() == 0)
+        {
+            throw std::runtime_error("No items found");
+        }
+
         return items;
 
     }
@@ -101,3 +106,43 @@ std::vector<Item> ItemService::SearchItem(Filter filter, const std::string& Valu
     }
     
 }
+
+std::vector<Item> ItemService::GetAllItems()
+{
+    std::vector<Item> items;
+
+    try
+    {
+        if(repository->ReadAll().size() == 0)
+        {
+            throw std::runtime_error("No items found");
+            return items;
+        }
+        else
+        {
+            items = repository->ReadAll();
+        }
+        
+        return items;
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return items;
+    }
+}
+
+bool ItemService::ModifyItem(const Item& item)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
+    
+};

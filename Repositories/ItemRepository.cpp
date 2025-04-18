@@ -3,7 +3,7 @@
 ItemRepository::ItemRepository(std::shared_ptr<SQL> Database)
     : Database_(std::move(Database)) {}
 
-std::vector<Item> ItemRepository::ReadByCode(const std::string& _ItemCode)
+std::vector<Item> ItemRepository::ReadByCode(const std::string &_ItemCode)
 {
     std::vector<Item> items;
 
@@ -83,7 +83,8 @@ std::vector<Item> ItemRepository::ReadByName(const std::string &_Name)
     }
 };
 
-std::vector<Item> ItemRepository::ReadByCodebars(const std::string& _Codebars) {
+std::vector<Item> ItemRepository::ReadByCodebars(const std::string &_Codebars)
+{
     std::vector<Item> items;
 
     try
@@ -153,9 +154,9 @@ std::vector<Item> ItemRepository::ReadAll()
     return items;
 };
 
-std::vector<Item> ItemRepository::ReadByEntry(const int &_Entry)
+Item ItemRepository::ReadByEntry(const int &_Entry)
 {
-    std::vector<Item> items;
+    Item item;
 
     try
     {
@@ -165,31 +166,34 @@ std::vector<Item> ItemRepository::ReadByEntry(const int &_Entry)
 
         dataTable.Fill(Database_->FetchResults(Query));
 
-        std::cout << "Items desde ReadAll " << dataTable.RowsCount() << std::endl;
-
-        for (int i = 0; i < dataTable.RowsCount(); i++)
+        if (dataTable.RowsCount() == 1)
         {
-            std::cout << dataTable[i]["Entry"] << std::endl;
-            std::cout << dataTable[i]["ItemName"] << std::endl;
-            std::cout << dataTable[i]["ItemCode"] << std::endl;
-            std::cout << dataTable[i]["Codebars"] << std::endl;
-            std::cout << dataTable[i]["OnHand"] << std::endl;
+            std::cout << "Items desde ReadAll " << dataTable.RowsCount() << std::endl;
 
-            items.push_back(Item{
-                std::stoi(dataTable[i]["Entry"]),
-                dataTable[i]["ItemName"],
-                dataTable[i]["ItemCode"],
-                dataTable[i]["Codebars"],
-                std::stof(dataTable[i]["OnHand"]),
-            });
+            std::cout << dataTable[0]["Entry"] << std::endl;
+            std::cout << dataTable[0]["ItemName"] << std::endl;
+            std::cout << dataTable[0]["ItemCode"] << std::endl;
+            std::cout << dataTable[0]["Codebars"] << std::endl;
+            std::cout << dataTable[0]["OnHand"] << std::endl;
+
+            item.Entry = std::stoi(dataTable[0]["Entry"]);
+            item.ItemName = dataTable[0]["ItemName"];
+            item.ItemCode = dataTable[0]["ItemCode"];
+            item.Codebars = dataTable[0]["Codebars"];
+            item.OnHand = std::stof(dataTable[0]["OnHand"]);
+
+            return item;
         }
-
-        return items;
+        else
+        {
+            throw std::runtime_error("Existen inconsistencias en los datos, existe mas de un Entry " + std::to_string(_Entry) + " en la tabla Items");
+            return item;
+        }
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return items;
+        return item;
     }
 };
 
@@ -216,8 +220,28 @@ bool ItemRepository::Create(const Item &_Item)
         return false;
     }
 };
-bool ItemRepository::Update(const Item &_Item) {
 
+bool ItemRepository::Update(const Item &_Item)
+{
+    try
+    {
+        std::string Query = "UPDATE Items SET ItemName = '" + _Item.ItemName + "', ItemCode = '" + _Item.ItemCode + "', Codebars = '" + _Item.Codebars + "' , OnHand = " + std::to_string(_Item.OnHand) + " WHERE Entry = " + std::to_string(_Item.Entry);
+
+        if (Database_->RunStatement(Query))
+        {
+            return true;
+        }
+        else
+        {
+            throw;
+            return false;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
 };
 
 bool ItemRepository::Delete(const Item &_Item) {
