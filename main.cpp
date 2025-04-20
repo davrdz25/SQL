@@ -20,9 +20,9 @@ int main()
             std::shared_ptr itemRepository = std::make_shared<ItemRepository>(Database);
             ItemService service(itemRepository);
 
-            Item item = service.SearchItem(1);
-            std::vector<Item> items2 = service.SearchItem(ItemCode, "LAP123");
-            std::vector<Item> items3 = service.SearchItem(ItemName, "LAP123");
+            Item item = service.SearchItem(1).value();
+            std::vector<Item> items2 = service.SearchItem(ItemCode, "LAP123").value();
+            std::vector<Item> items3 = service.SearchItem(ItemName, "LAP123").value();
 
             std::cout << "Items desde main " << std::endl;
 
@@ -46,7 +46,7 @@ int main()
 
             std::cout << "Item actualizado desde main " << std::endl;
 
-            Item item2 = service.SearchItem(1);
+            Item item2 = service.SearchItem(1).value();
 
 
             std::cout << item2.Entry << std::endl;
