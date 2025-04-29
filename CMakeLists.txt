@@ -21,7 +21,7 @@ find_package(Boost REQUIRED)
 if(WIN32)
     find_library(ODBC_LIBRARY odbc32)
 elseif(APPLE)
-    find_library(ODBC_LIBRARY iodbc)
+    find_library(ODBC_LIBRARY odbc)
 elseif(UNIX)
     find_library(ODBC_LIBRARY odbc)
 endif()
@@ -44,6 +44,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
     ${CMAKE_CURRENT_SOURCE_DIR}/GlobalEnvironment
 )
+
 
 # Source files
 file(GLOB_RECURSE SRC_FILES

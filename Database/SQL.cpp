@@ -9,7 +9,7 @@ void SQL::ExtractError(const char *fn, SQLHANDLE handle, SQLSMALLINT type)
     SQLSMALLINT len;
     SQLRETURN ret;
 
-    std::cerr << "Error en " << fn << ":" << std::endl;
+    std::cerr << "Error in " << fn << ":" << std::endl;
     do
     {
         ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len);
@@ -39,22 +39,24 @@ bool SQL::Connect()
 {
     try
     {
-        std::string connString = "Driver={ODBC Driver 18 for SQL Server};Server=" + _ServerName + ";Database=" + _DatabaseName + ";UID=" + _UserName + ";PWD=" + _Password + ";TrustServerCertificate=" + (_TrustServerCertificate ? "yes" : "no") + ";APP=DebugC++";
+
+        std::string connString = "Driver={ODBC Driver 18 for SQL Server};Server=" + _ServerName + ";UID=" + _UserName + ";PWD=" + _Password + ";Database=POS;TrustServerCertificate=yes;";
+
         SQLRETURN retcode = SQLDriverConnect(hdbc, NULL, (SQLCHAR *)connString.c_str(), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_NOPROMPT);
 
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         {
-            ExtractError("SQLConnect", hdbc, SQL_HANDLE_DBC);
+
+            throw std::runtime_error("Error conecting database\n");
             return false;
         }
-        else
-        {
-            return true;
-        }
+        return true;
     }
-    catch (const std::exception &ex)
+    catch (const std::exception &Ex)
     {
-        throw std::runtime_error(std::string("Error conectando a la base de datos: ") + ex.what());
+        ExtractError("SQLConnect", hdbc, SQL_HANDLE_DBC);
+        std::cerr << Ex.what();
+        return false;
     }
 }
 
@@ -86,14 +88,13 @@ std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::str
 
         retcode = SQLExecDirect(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-        {
-            ExtractError("RunStatement", hstmt, SQL_HANDLE_STMT);
             throw std::runtime_error("Error al ejecutar la consulta: " + query);
-        }
+    
 
         SQLNumResultCols(hstmt, &columnCount);
 
         std::vector<std::string> columnNames;
+
         for (SQLUSMALLINT i = 1; i <= columnCount; ++i)
         {
             SQLDescribeCol(hstmt, i, columnName, sizeof(columnName), &columnNameLength, &nativeType, &columnSize, &decimalDigits, &nullable);
@@ -112,12 +113,14 @@ std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::str
             }
             results.push_back(row);
         }
-        std::cout << "Tamanho desde consulta SQL " + std::to_string(results.size()) << std::endl;
+        
         return results;
+
     }
-    catch (const std::exception &e)
+    catch (const std::exception &Ex)
     {
-        std::cerr << e.what() << '\n';
+        ExtractError("Fetch results", hdbc, SQL_HANDLE_DBC);
+        std::cerr << Ex.what() << '\n';
         return results;
     }
 }
@@ -132,19 +135,17 @@ bool SQL::RunStatement(const std::string &query)
 
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         {
-            ExtractError("RunStatement", hstmt, SQL_HANDLE_STMT);
             throw std::runtime_error("Error al ejecutar la consulta: " + query);
             return false;
         }
-        else
-        {
-            return true;
-        }
 
         SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+
+        return true;
     }
     catch (const std::exception &ex)
     {
+        ExtractError("RunStatement", hstmt, SQL_HANDLE_STMT);
         std::cerr << "Excepción en RunStatement: " << ex.what() << std::endl;
         throw;
         return false;

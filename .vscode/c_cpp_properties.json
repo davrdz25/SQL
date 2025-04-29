@@ -15,7 +15,11 @@
             "intelliSenseMode": "macos-clang-x64",
             "browse": {
                 "path": [
-                    "${workspaceFolder}/include/**"
+                    "${workspaceFolder}/Database/**",
+                    "${workspaceFolder}/Models/**",
+                    "${workspaceFolder}/Interfaces/**",
+                    "${workspaceFolder}/Repositories/**",
+                    "${workspaceFolder}/Services/**"
                 ]
             }
         }

@@ -1,9 +1,8 @@
 #pragma one
 #include <iostream>
 
-class Item
+struct Item
 {
-public:
     int Entry;
     std::string ItemName;
     std::string ItemCode;

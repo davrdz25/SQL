@@ -91,9 +91,13 @@ std::optional<std::vector<Item>> ItemService::SearchItem(Filter filter, const st
             break;
 
         case ItemName:
+            if(!repository->ReadByName(Value).has_value())
+            {
+                throw std::invalid_argument("No items found \n");
+            }            
+            
             items = repository->ReadByName(Value).value();
             return items;
-            break;
 
         case Codebars:
             items = repository->ReadByCodebars(Value).value();

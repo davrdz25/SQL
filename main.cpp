@@ -20,11 +20,30 @@ int main()
             std::shared_ptr itemRepository = std::make_shared<ItemRepository>(Database);
             ItemService service(itemRepository);
 
-            Item item = service.SearchItem(1).value();
-            std::vector<Item> items2 = service.SearchItem(ItemCode, "LAP123").value();
-            std::vector<Item> items3 = service.SearchItem(ItemName, "LAP123").value();
+            /*std::cout << "Items desde main " << std::endl;
 
-            std::cout << "Items desde main " << std::endl;
+            Item item = service.SearchItem(1).value();
+            std::cout << "Items desde main 1" << std::endl;
+
+            std::vector<Item> items2 = service.SearchItem(ItemCode, "LAP123").value();
+
+            std::cout << "Items desde main 2" << std::endl; */
+
+            std::vector<Item> items3;
+            Item defaultItem = {
+                0,
+                "",
+                "",
+                "",
+                0,
+            };
+
+            std::vector<Item> df;
+            df.push_back(defaultItem);
+
+                items3 = service.SearchItem(ItemName, "123").value_or(df);
+
+            /* std::cout << "Items desde main " << std::endl;
 
             std::cout << item.Entry << std::endl;
             std::cout << item.ItemName << std::endl;
@@ -65,17 +84,20 @@ int main()
                 std::cout << items2[i].ItemCode << std::endl;
                 std::cout << items2[i].Codebars << std::endl;
                 std::cout << items2[i].OnHand << std::endl;
-            }
+            } */
         }
         else
         {
             std::cout << "No conectado" << std::endl;
         }
+
+        return 0;
+
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Error desde main: " << e.what() << std::endl;
+        return -1;
     }
 
-    return 0;
 }

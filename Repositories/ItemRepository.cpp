@@ -5,7 +5,6 @@ ItemRepository::ItemRepository(std::shared_ptr<SQL> Database): Database(std::mov
 
 std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_ItemCode)
 {
-
     try
     {
         DataTable dataTable;
@@ -20,12 +19,6 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_
 
             for (int i = 0; i < dataTable.RowsCount(); i++)
             {
-                std::cout << dataTable[i]["Entry"] << std::endl;
-                std::cout << dataTable[i]["ItemName"] << std::endl;
-                std::cout << dataTable[i]["ItemCode"] << std::endl;
-                std::cout << dataTable[i]["Codebars"] << std::endl;
-                std::cout << dataTable[i]["OnHand"] << std::endl;
-
                 items.push_back(Item{
                     std::stoi(dataTable[i]["Entry"]),
                     dataTable[i]["ItemName"],
@@ -49,28 +42,23 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_
 
 std::optional<std::vector<Item>> ItemRepository::ReadByName(const std::string &_Name)
 {
-
     try
     {
-        DataTable dataTable;
-
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE ItemName = '" + _Name + "'";
 
+        DataTable dataTable;
+        
         dataTable.Fill(Database->FetchResults(Query));
 
-        if (dataTable.RowsCount() == 0)
+        if(dataTable.RowsCount() == 0)
             return std::nullopt;
-
+            
         std::vector<Item> items;
+
+        std::cout << "Results length: " << std::to_string(dataTable.RowsCount()) << std::endl;
 
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
-            std::cout << dataTable[i]["Entry"] << std::endl;
-            std::cout << dataTable[i]["ItemName"] << std::endl;
-            std::cout << dataTable[i]["ItemCode"] << std::endl;
-            std::cout << dataTable[i]["Codebars"] << std::endl;
-            std::cout << dataTable[i]["OnHand"] << std::endl;
-
             items.push_back(Item{
                 std::stoi(dataTable[i]["Entry"]),
                 dataTable[i]["ItemName"],
@@ -80,6 +68,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadByName(const std::string &_
             });
         }
 
+        std::cout << "Items by name length: " << std::to_string(items.size()) << std::endl;
         return items;
     }
     catch (const std::exception &e)
@@ -106,12 +95,6 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCodebars(const std::strin
 
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
-            std::cout << dataTable[i]["Entry"] << std::endl;
-            std::cout << dataTable[i]["ItemName"] << std::endl;
-            std::cout << dataTable[i]["ItemCode"] << std::endl;
-            std::cout << dataTable[i]["Codebars"] << std::endl;
-            std::cout << dataTable[i]["OnHand"] << std::endl;
-
             items.push_back(Item{
                 std::stoi(dataTable[i]["Entry"]),
                 dataTable[i]["ItemName"],
@@ -135,24 +118,14 @@ std::optional<std::vector<Item>> ItemRepository::ReadAll()
     try
     {
         DataTable dataTable;
+        std::vector<Item> items;
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items";
 
         dataTable.Fill(Database->FetchResults(Query));
 
-        if (dataTable.RowsCount() == 0)
-            return std::nullopt;
-
-        std::vector<Item> items;
-
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
-            std::cout << dataTable[i]["Entry"] << std::endl;
-            std::cout << dataTable[i]["ItemName"] << std::endl;
-            std::cout << dataTable[i]["ItemCode"] << std::endl;
-            std::cout << dataTable[i]["Codebars"] << std::endl;
-            std::cout << dataTable[i]["OnHand"] << std::endl;
-
             items.push_back(Item{
                 std::stoi(dataTable[i]["Entry"]),
                 dataTable[i]["ItemName"],
@@ -181,6 +154,7 @@ std::optional<Item> ItemRepository::ReadByEntry(const int &_Entry)
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE Entry = " + std::to_string(_Entry);
 
         dataTable.Fill(Database->FetchResults(Query));
+
 
         if (dataTable.RowsCount() == 1)
         {
