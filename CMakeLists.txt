@@ -15,7 +15,7 @@ elseif(UNIX)
 endif()
 
 # Boost
-find_package(Boost REQUIRED)
+#find_package(Boost REQUIRED)
 
 # ODBC
 if(WIN32)
@@ -42,7 +42,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
     ${CMAKE_CURRENT_SOURCE_DIR}/Services
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
-    ${CMAKE_CURRENT_SOURCE_DIR}/GlobalEnvironment
 )
 
 
@@ -53,7 +52,6 @@ file(GLOB_RECURSE SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GlobalEnvironment/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 # Executable
@@ -61,9 +59,9 @@ add_executable(Server ${SRC_FILES})
 
 # Link libraries
 target_link_libraries(Server
-    ${Boost_LIBRARIES}
+    #${Boost_LIBRARIES}
     ${ODBC_LIBRARY}
-    graphqlservice
+    #graphqlservice
 )
 
 # macOS: link iconv if needed

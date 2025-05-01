@@ -1,7 +1,6 @@
 #include "ItemRepository.hpp"
 
-ItemRepository::ItemRepository(std::shared_ptr<SQL> Database): Database(std::move(Database)) 
-{}
+ItemRepository::ItemRepository(std::shared_ptr<SQL> Database): Database(std::move(Database)) {}
 
 std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_ItemCode)
 {
@@ -186,11 +185,17 @@ bool ItemRepository::Create(const Item &_Item)
 {
     try
     {
-        std::string Query = "INSERT INTO Items  ([Entry], ItemName, ItemCode, Codebars, OnHand) VALUES (?,?,?,?,?)";
-        std::vector<std::string> params = {std::to_string(_Item.Entry), _Item.ItemName, _Item.ItemCode, _Item.Codebars, std::to_string(_Item.OnHand)};
+        std::string Query = "INSERT INTO Items ([Entry], ItemName, ItemCode, Codebars, OnHand) VALUES (?,?,?,?,?)";
+        std::vector<std::string> params = {
+            std::to_string(_Item.Entry), 
+            _Item.ItemName, 
+            _Item.ItemCode, 
+            _Item.Codebars, 
+            std::to_string(_Item.OnHand)
+        };
 
         std::cout << Query << std::endl;
-        
+
         if (Database->RunPrepared(Query, params))
             return true;
 
@@ -207,9 +212,18 @@ bool ItemRepository::Update(const Item &_Item)
 {
     try
     {
-        std::string Query = "UPDATE Items SET ItemName = '" + _Item.ItemName + "', ItemCode = '" + _Item.ItemCode + "', Codebars = '" + _Item.Codebars + "' , OnHand = " + std::to_string(_Item.OnHand) + " WHERE Entry = " + std::to_string(_Item.Entry);
+        std::string Query = "UPDATE Items SET ItemName = ?, ItemCode = ?, Codebars = ?, OnHand = ? WHERE [Entry] = ? ";
+        std::vector<std::string> params = {
+            _Item.ItemName, 
+            _Item.ItemCode, 
+            _Item.Codebars, 
+            std::to_string(_Item.OnHand),
+            std::to_string(_Item.Entry) 
+        };
 
-        if (Database->RunStatement(Query))
+        std::cout << Query << std::endl;
+
+        if (Database->RunPrepared(Query, params))
             return true;
 
         return false;
@@ -224,5 +238,24 @@ bool ItemRepository::Update(const Item &_Item)
 
 bool ItemRepository::Delete(const Item &_Item) 
 {
+    try
+    {
+        std::string Query = "DELETE FROM Items WHERE [Entry] = ? ";
+        std::vector<std::string> params = {
+            std::to_string(_Item.Entry) 
+        };
 
+        std::cout << Query << std::endl;
+
+        if (Database->RunPrepared(Query, params))
+            return true;
+
+        return false;
+        
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
 };
