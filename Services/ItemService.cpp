@@ -29,6 +29,8 @@ bool ItemService::ModifyItem(const Item &item)
 {
     try
     {
+        if(repository->Update(item))
+            return true;
     }
     catch (const std::exception &e)
     {
