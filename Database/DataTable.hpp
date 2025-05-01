@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <map>
-
+#include <vector>
 
 class DataTable {
     private:
