@@ -1,157 +1,132 @@
 #include "ItemService.hpp"
 
 ItemService::ItemService(std::shared_ptr<IItemRepository> repository)
-        : repository(std::move(repository)) {};
+    : repository(std::move(repository)) {};
 
-bool ItemService::AddItem(const Item& item)
+bool ItemService::AddItem(const Item &item)
 {
     try
     {
-        if(item.Codebars.length() == 0){
-            throw std::invalid_argument("Codebars must be greater than 0");
-            return false;
-        }
+        if (item.Codebars.length() == 0)
+            throw std::invalid_argument("Codebars empty");
 
-        if(item.ItemName.length() == 0){
-            throw std::invalid_argument("ItemName must be greater than 0");
-            return false;
-        }
-
-        if(item.ItemCode.length() == 0){
-            throw std::invalid_argument("ItemCode must be greater than 0");
-            return false;
-        }
+        if (item.ItemName.length() == 0 || item.ItemName == "")
+            throw std::invalid_argument("Name empty");
+        
+        if (item.ItemCode.length() == 0)
+            throw std::invalid_argument("Code empty");
 
         repository->Create(item);
-
     }
-    catch(const std::exception& Ex)
+    catch (const std::exception &Ex)
     {
-        std::runtime_error(Ex.what());
+        std::cerr << "Error ItemService " << Ex.what() << std::endl;
         return false;
     }
 }
 
-std::optional<Item> ItemService::SearchItem(const int& Entry)
+bool ItemService::ModifyItem(const Item &item)
 {
-
     try
     {
-        if(Entry == 0)
-        {
-            throw std::invalid_argument("Entry must be greater than 0");
-            return std::nullopt;
-        }
-
-        if(Entry < 0)
-        {
-            throw std::invalid_argument("Entry must be greater positive");
-            return std::nullopt;
-        }
-
-        if(repository->ReadByEntry(Entry).has_value())
-        {
-            Item item;
-
-            item = repository->ReadByEntry(Entry).value();
-
-            return item;
-        }
-
-        throw std::invalid_argument("Item not found or foudn more than one");
-        return std::nullopt;
-            
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
+        return false;
     }
-    
-}
+};
 
-std::optional<std::vector<Item>> ItemService::SearchItem(Filter filter, const std::string& Value)
+Item ItemService::SearchItem(const int &Entry)
 {
-
+    Item item;
     try
     {
-        std::vector<Item> items;
+        if (Entry == 0 || Entry < 0)
+            throw std::invalid_argument("Invalid entry value");
+    
 
-        if(Value == "" || Value.size() == 0)
-        {
+        std::optional<Item> itemRepo = repository->ReadByEntry(Entry);
+
+        if (!itemRepo.has_value())
+            throw std::invalid_argument("Item not found");
+
+        item = itemRepo.value();
+
+        return item;
+    }
+    catch (const std::exception &Ex)
+    {
+        std::cerr << Ex.what() << '\n';
+        return item;
+    }
+}
+
+std::vector<Item> ItemService::SearchItem(Filter filter, const std::string &Value)
+{
+    std::vector<Item> items;
+    try
+    {
+        std::optional<std::vector<Item>> itemRepo;
+
+        if (Value == "" || Value.size() == 0)
             throw std::invalid_argument("Value canot be empty");
-            return std::nullopt;
-        }
 
         switch (filter)
         {
         case ItemCode:
-            items = repository->ReadByCode(Value).value();
-            return items;
-            break;
+            itemRepo = repository->ReadByCode(Value);
+
+            if (!itemRepo.has_value())
+                throw std::runtime_error("Items not found");
+        break;
 
         case ItemName:
-            if(!repository->ReadByName(Value).has_value())
-            {
-                throw std::invalid_argument("No items found \n");
-            }            
-            
-            items = repository->ReadByName(Value).value();
-            return items;
+            itemRepo = repository->ReadByName(Value);
+
+            if (!itemRepo.has_value())
+                throw std::runtime_error("Items not found");
+        break;
 
         case Codebars:
-            items = repository->ReadByCodebars(Value).value();
-            return items;
-            break;
-        
+            itemRepo = repository->ReadByCodebars(Value);
+
+            if (!itemRepo.has_value())
+                throw std::runtime_error("Items not found");
+        break;
+
         default:
-            return std::nullopt;
-            break;
+            throw std::runtime_error("Items not found");
         }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-        return std::nullopt;
-    }
-    
-}
 
-std::optional<std::vector<Item>> ItemService::GetAllItems()
-{
-
-    try
-    {
-        std::vector<Item> items;
-
-        if(!repository->ReadAll().has_value())
-        {
-            throw std::runtime_error("No items found");
-            return std::nullopt;
-        }
-        
-        items = repository->ReadAll().value();
-        
+        items = itemRepo.value();
         return items;
-
     }
-    catch(const std::exception& e)
+    catch (const std::exception &Ex)
     {
-        std::cerr << e.what() << '\n';
-        return std::nullopt;
+        std::cerr << Ex.what() << '\n';
+        return items;
     }
 }
 
-bool ItemService::ModifyItem(const Item& item)
+std::vector<Item> ItemService::GetAllItems()
 {
+    std::vector<Item> items;
+
     try
     {
+        std::optional<std::vector<Item>> itemRepo = repository->ReadAll();
 
+        if (!itemRepo.has_value())
+            throw std::runtime_error("No items found");
+
+        items = itemRepo.value();
+
+        return items;
     }
-    catch(const std::exception& e)
+    catch (const std::exception &Ex)
     {
-        std::cerr << e.what() << '\n';
-        return false;
+        std::cerr << Ex.what() << '\n';
+        return items;
     }
-    
-};
+}

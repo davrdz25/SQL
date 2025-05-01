@@ -9,9 +9,10 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_
     {
         DataTable dataTable;
 
-        std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE ItemCode = '" + _ItemCode + "'";
+        std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE ItemCode = ?";
+        std::vector<std::string> params = {_ItemCode};
 
-        dataTable.Fill(Database->FetchResults(Query));
+        dataTable.Fill(Database->FetchPrepared(Query, params));
 
         if (dataTable.RowsCount() > 0)
         {
@@ -122,7 +123,13 @@ std::optional<std::vector<Item>> ItemRepository::ReadAll()
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items";
 
+        std::cout << Query << std::endl;
+
+        
         dataTable.Fill(Database->FetchResults(Query));
+
+        if (dataTable.RowsCount() == 0)
+            return std::nullopt;
 
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
@@ -155,7 +162,6 @@ std::optional<Item> ItemRepository::ReadByEntry(const int &_Entry)
 
         dataTable.Fill(Database->FetchResults(Query));
 
-
         if (dataTable.RowsCount() == 1)
         {
             item.Entry = std::stoi(dataTable[0]["Entry"]);
@@ -180,10 +186,12 @@ bool ItemRepository::Create(const Item &_Item)
 {
     try
     {
-        std::string Query = "INSERT INTO Items VALUES ((SELECT MAX(Entry) + 1 FROM Items), '" + _Item.ItemName + "', " + "'" + _Item.ItemCode + "', '" + _Item.Codebars + "', " + std::to_string(_Item.OnHand) + ")";
+        std::string Query = "INSERT INTO Items  ([Entry], ItemName, ItemCode, Codebars, OnHand) VALUES (?,?,?,?,?)";
+        std::vector<std::string> params = {std::to_string(_Item.Entry), _Item.ItemName, _Item.ItemCode, _Item.Codebars, std::to_string(_Item.OnHand)};
 
-        if (Database->RunStatement(Query))
-
+        std::cout << Query << std::endl;
+        
+        if (Database->RunPrepared(Query, params))
             return true;
 
         return false;

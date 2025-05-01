@@ -16,9 +16,9 @@ public:
 
     bool AddItem(const Item& item);
     bool ModifyItem(const Item& item);
-    std::optional<std::vector<Item>> GetAllItems();
-    std::optional<Item> SearchItem(const int&);
-    std::optional<std::vector<Item>> SearchItem(enum Filter, const std::string&);
+    std::vector<Item> GetAllItems();
+    Item SearchItem(const int&);
+    std::vector<Item> SearchItem(enum Filter, const std::string&);
 
 private:
     std::shared_ptr<IItemRepository> repository;

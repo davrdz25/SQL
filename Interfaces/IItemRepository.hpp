@@ -10,5 +10,4 @@ class IItemRepository : public IBaseRepository<Item> {
         virtual std::optional<std::vector<Item>> ReadByName(const std::string&) = 0;
         virtual std::optional<std::vector<Item>> ReadByCodebars(const std::string&) = 0;
         virtual std::optional<std::vector<Item>> ReadByCode(const std::string&) = 0;
-
 };

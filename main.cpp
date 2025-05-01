@@ -20,6 +20,16 @@ int main()
             std::shared_ptr itemRepository = std::make_shared<ItemRepository>(Database);
             ItemService service(itemRepository);
 
+            std::vector<Item> items = service.GetAllItems();
+
+            for(int i = 0; i < items.size(); i++)
+            {
+                std::cout << items[i].Entry << std::endl;
+                std::cout << items[i].ItemCode << std::endl;
+                std::cout << items[i].ItemName << std::endl;
+                std::cout << items[i].Codebars<< std::endl;
+                std::cout << items[i].OnHand << std::endl;
+            }
             /*std::cout << "Items desde main " << std::endl;
 
             Item item = service.SearchItem(1).value();
@@ -29,19 +39,6 @@ int main()
 
             std::cout << "Items desde main 2" << std::endl; */
 
-            std::vector<Item> items3;
-            Item defaultItem = {
-                0,
-                "",
-                "",
-                "",
-                0,
-            };
-
-            std::vector<Item> df;
-            df.push_back(defaultItem);
-
-                items3 = service.SearchItem(ItemName, "123").value_or(df);
 
             /* std::cout << "Items desde main " << std::endl;
 
