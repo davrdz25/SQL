@@ -3,6 +3,9 @@ project(GraphQLServer)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+
 option(DISABLE_AUTO "No use auto" ON)
 
 # Detect platform
@@ -30,10 +33,15 @@ if(NOT ODBC_LIBRARY)
     message(FATAL_ERROR "ODBC library not found")
 endif()
 
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(GTKMM gtkmm-4.0 REQUIRED)
+
 # cppgraphqlgen
 #find_package(graphqlservice REQUIRED)
 
-# Include directories
+#target_include_directories(Server PRIVATE ${GTKMM_INCLUDE_DIRS})
+#target_link_directories(Server PRIVATE ${GTKMM_LIBRARY_DIRS})
+#target_link_libraries(Server PRIVATE ${GTKMM_LIBRARIES})
 
 # Include directories
 include_directories(
@@ -43,7 +51,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Services
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
 )
-
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -63,6 +70,7 @@ target_link_libraries(Server
     ${ODBC_LIBRARY}
     #graphqlservice
 )
+
 
 # macOS: link iconv if needed
 if(APPLE)

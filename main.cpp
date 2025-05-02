@@ -1,16 +1,31 @@
 #include "Repositories/ItemRepository.hpp"
 #include "Services/ItemService.hpp"
+/* #include <gtkmm.h>
 
+class MainWindow : public Gtk::Window
+{
+public:
+    MainWindow()
+    {
+        set_title("Mi App GTKmm en macOS");
+        set_default_size(400, 300);
+    }
+};
+ */
 int main()
 {
     try
     {
+        /* Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("org.example.gtkapp");
+
+        MainWindow window;
+        return app->run(window); */
         std::shared_ptr Database = std::make_shared<SQL>();
 
         Database->ServerName("192.168.1.253");
         Database->UserName("sa");
-        Database->Password("Development..");
-        Database->DatabaseName("POS");
+        Database->Password("B1Admin*");
+        Database->DatabaseName("SBODEMOMX");
         Database->TrustServerCertificate(true);
 
         if (Database->Connect())
@@ -22,12 +37,12 @@ int main()
 
             std::vector<Item> items = service.GetAllItems();
 
-            for(int i = 0; i < items.size(); i++)
+            for (int i = 0; i < items.size(); i++)
             {
                 std::cout << items[i].Entry << std::endl;
                 std::cout << items[i].ItemCode << std::endl;
                 std::cout << items[i].ItemName << std::endl;
-                std::cout << items[i].Codebars<< std::endl;
+                std::cout << items[i].Codebars << std::endl;
                 std::cout << items[i].OnHand << std::endl;
             }
             /*std::cout << "Items desde main " << std::endl;
@@ -38,7 +53,6 @@ int main()
             std::vector<Item> items2 = service.SearchItem(ItemCode, "LAP123").value();
 
             std::cout << "Items desde main 2" << std::endl; */
-
 
             /* std::cout << "Items desde main " << std::endl;
 
@@ -89,12 +103,10 @@ int main()
         }
 
         return 0;
-
     }
     catch (const std::exception &e)
     {
         std::cerr << "Error desde main: " << e.what() << std::endl;
         return -1;
     }
-
 }

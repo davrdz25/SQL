@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "DataTable.hpp"
+#include "../Database/DataTable.hpp"
 
 class ISQL {
 public:
