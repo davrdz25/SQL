@@ -90,6 +90,15 @@
         "iomanip": "cpp",
         "regex": "cpp",
         "sstream": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "__bits": "cpp",
+        "__debug": "cpp",
+        "__errc": "cpp",
+        "__mutex_base": "cpp",
+        "__nullptr": "cpp",
+        "__string": "cpp",
+        "__tuple": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp"
     }
 }

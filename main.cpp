@@ -1,25 +1,10 @@
 #include "Repositories/ItemRepository.hpp"
 #include "Services/ItemService.hpp"
-/* #include <gtkmm.h>
 
-class MainWindow : public Gtk::Window
-{
-public:
-    MainWindow()
-    {
-        set_title("Mi App GTKmm en macOS");
-        set_default_size(400, 300);
-    }
-};
- */
 int main()
 {
     try
     {
-        /* Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("org.example.gtkapp");
-
-        MainWindow window;
-        return app->run(window); */
         std::shared_ptr Database = std::make_shared<SQL>();
 
         Database->ServerName("192.168.1.253");
