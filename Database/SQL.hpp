@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 #include <iostream>
 #include <sql.h>
 #include <sqlext.h>

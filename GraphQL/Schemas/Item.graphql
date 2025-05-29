@@ -1,0 +1,10 @@
+type Item {
+  Name: String!
+  Code: String!
+  Codebars: String!
+  OnHand: Float!
+}
+
+type Query {
+  items: [Item!]!
+}

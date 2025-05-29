@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
-project(Core)
+project(GraphQLServer)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
+
+# Detectar plataforma
 if(WIN32)
     message(STATUS "Platform: Windows")
 elseif(APPLE)
@@ -14,11 +16,10 @@ elseif(UNIX)
     message(STATUS "Platform: Linux")
 endif()
 
+# Buscar librería ODBC
 if(WIN32)
     find_library(ODBC_LIBRARY odbc32)
-elseif(APPLE)
-    find_library(ODBC_LIBRARY odbc)
-elseif(UNIX)
+elseif(APPLE OR UNIX)
     find_library(ODBC_LIBRARY odbc)
 endif()
 
@@ -26,50 +27,92 @@ if(NOT ODBC_LIBRARY)
     message(FATAL_ERROR "ODBC library not found")
 endif()
 
-set(LIBCORE_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/Database
-    ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
-    ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
-    ${CMAKE_CURRENT_SOURCE_DIR}/Services
-    ${CMAKE_CURRENT_SOURCE_DIR}/Models
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(GRAPHQLPARSER REQUIRED libgraphqlparser)
+
+find_package(Boost REQUIRED COMPONENTS system thread)
+
+# Buscar Boost.JSON - puede no ser detectado por find_package, así que indicamos ruta manual
+find_library(BOOST_JSON_LIB NAMES boost_json PATHS /usr/local/lib /usr/lib NO_DEFAULT_PATH)
+
+if(NOT BOOST_JSON_LIB)
+    message(FATAL_ERROR "Boost.JSON library not found")
+endif()
+
+find_package(Threads REQUIRED)
+
+# Buscar librerías graphql
+find_library(GRAPHQLRESPONSE_LIB NAMES graphqlresponse PATHS /usr/local/lib /usr/lib)
+find_library(GRAPHQLPEG_LIB NAMES graphqlpeg PATHS /usr/local/lib /usr/lib)
+find_library(GRAPHQLSERVICE_LIB NAMES graphqlservice PATHS /usr/local/lib /usr/lib)
+find_library(GRAPHQLCLIENT_LIB NAMES graphqlclient PATHS /usr/local/lib /usr/lib)
+find_library(GRAPHQLJSON_LIB NAMES graphqljson PATHS /usr/local/lib /usr/lib)
+
+if(NOT GRAPHQLSERVICE_LIB OR NOT GRAPHQLRESPONSE_LIB OR NOT GRAPHQLPEG_LIB)
+    message(FATAL_ERROR "No se encontraron todas las librerías de graphql necesarias")
+endif()
+
+set(GRAPHQL_GENERATED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Generated)
+
+set(GRAPHQL_GENERATED_SOURCES
+    ${GRAPHQL_GENERATED_DIR}/Item/ItemObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/Item/ItemSchema.cpp
+    ${GRAPHQL_GENERATED_DIR}/Item/QueryObject.cpp
 )
 
-include_directories(${LIBCORE_INCLUDE_DIRS})
+set(GRAPHQL_CUSTOM_RESOLVERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers/QueryResolver.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers/ItemResolver.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers/ItemQueryResolver.hpp
+)
 
-file(GLOB_RECURSE LIBCORE_SOURCES
+file(GLOB_RECURSE PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Database/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 
-file(GLOB_RECURSE LIBCORE_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/Database/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.hpp
+list(APPEND PROJECT_SOURCES ${GRAPHQL_CUSTOM_RESOLVERS})
+
+add_executable(GraphQLServer
+    ${PROJECT_SOURCES}
+    ${GRAPHQL_GENERATED_SOURCES}
 )
 
-add_library(Core STATIC ${LIBCORE_SOURCES} ${LIBCORE_HEADERS})
+target_include_directories(GraphQLServer PRIVATE
+    ${GRAPHQLPARSER_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Database
+    ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
+    ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
+    ${CMAKE_CURRENT_SOURCE_DIR}/Services
+    ${CMAKE_CURRENT_SOURCE_DIR}/Models
+    ${GRAPHQL_GENERATED_DIR}
+)
 
-target_link_libraries(Core ${ODBC_LIBRARY})
+target_link_libraries(GraphQLServer PRIVATE
+    ${ODBC_LIBRARY}
+    ${GRAPHQLPARSER_LIBRARIES}
+    ${Boost_LIBRARIES}
+    Threads::Threads
+    ${BOOST_JSON_LIB}
+    ${GRAPHQLJSON_LIB}  
+    ${GRAPHQLPEG_LIB}          
+    ${GRAPHQLRESPONSE_LIB}      
+    ${GRAPHQLSERVICE_LIB}       
+    # Si necesitas el cliente
+    # ${GRAPHQLCLIENT_LIB}
+)
+
 if(APPLE)
-    target_link_libraries(Core iconv)
+    target_link_libraries(GraphQLServer PRIVATE iconv)
+    set_target_properties(GraphQLServer PROPERTIES
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "/usr/local/lib"
+    )
 endif()
-
-target_include_directories(Core PUBLIC ${LIBCORE_INCLUDE_DIRS})
-
-set_target_properties(Core PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    PUBLIC_HEADER "${LIBCORE_HEADERS}"
-)
-
-foreach(header IN LISTS LIBCORE_HEADERS)
-    file(RELATIVE_PATH rel_path ${CMAKE_CURRENT_SOURCE_DIR} ${header})
-    get_filename_component(rel_dir ${rel_path} DIRECTORY)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/${rel_dir})
-    configure_file(${header} ${CMAKE_BINARY_DIR}/include/${rel_path} COPYONLY)
-endforeach()
 
