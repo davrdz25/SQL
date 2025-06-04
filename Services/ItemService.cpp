@@ -3,7 +3,7 @@
 ItemService::ItemService(std::shared_ptr<IItemRepository> repository)
     : repository(std::move(repository)) {};
 
-bool ItemService::AddItem(const Item &item)
+bool ItemService::AddItem(const ItemModel &item)
 {
     try
     {
@@ -25,7 +25,7 @@ bool ItemService::AddItem(const Item &item)
     }
 }
 
-bool ItemService::ModifyItem(const Item &item)
+bool ItemService::ModifyItem(const ItemModel &item)
 {
     try
     {
@@ -39,16 +39,16 @@ bool ItemService::ModifyItem(const Item &item)
     }
 };
 
-Item ItemService::SearchItem(const int &Entry)
+ItemModel ItemService::SearchItem(const int &Entry)
 {
-    Item item;
+    ItemModel item;
     try
     {
         if (Entry == 0 || Entry < 0)
             throw std::invalid_argument("Invalid entry value");
     
 
-        std::optional<Item> itemRepo = repository->ReadByEntry(Entry);
+        std::optional<ItemModel> itemRepo = repository->ReadByEntry(Entry);
 
         if (!itemRepo.has_value())
             throw std::invalid_argument("Item not found");
@@ -64,12 +64,12 @@ Item ItemService::SearchItem(const int &Entry)
     }
 }
 
-std::vector<Item> ItemService::SearchItem(Filter filter, const std::string &Value)
+std::vector<ItemModel> ItemService::SearchItem(Filter filter, const std::string &Value)
 {
-    std::vector<Item> items;
+    std::vector<ItemModel> items;
     try
     {
-        std::optional<std::vector<Item>> itemRepo;
+        std::optional<std::vector<ItemModel>> itemRepo;
 
         if (Value == "" || Value.size() == 0)
             throw std::invalid_argument("Value canot be empty");
@@ -111,13 +111,13 @@ std::vector<Item> ItemService::SearchItem(Filter filter, const std::string &Valu
     }
 }
 
-std::vector<Item> ItemService::GetAllItems()
+std::vector<ItemModel> ItemService::GetAllItems()
 {
-    std::vector<Item> items;
+    std::vector<ItemModel> items;
 
     try
     {
-        std::optional<std::vector<Item>> itemRepo = repository->ReadAll();
+        std::optional<std::vector<ItemModel>> itemRepo = repository->ReadAll();
 
         if (!itemRepo.has_value())
             throw std::runtime_error("No items found");

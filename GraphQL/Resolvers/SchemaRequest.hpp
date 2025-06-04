@@ -1,14 +1,18 @@
-// GraphQL/SchemaRequest.h
 #pragma once
 
 #include <graphqlservice/GraphQLService.h>
 
-namespace graphql::service {
+namespace graphql::schema {
+    class Schema;
+}
 
-class SchemaRequest : public Request {
+class SchemaRequest : public graphql::service::Request
+{
 public:
-    SchemaRequest(TypeMap operationTypes, std::shared_ptr<schema::Schema> schema)
-        : Request(std::move(operationTypes), std::move(schema)) {}
+    SchemaRequest(
+        graphql::service::TypeMap operationTypes,
+        std::shared_ptr<graphql::schema::Schema> schema)
+        : graphql::service::Request(std::move(operationTypes), std::move(schema))
+    {
+    }
 };
-
-} // namespace graphql::service

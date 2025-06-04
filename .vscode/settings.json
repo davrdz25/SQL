@@ -109,6 +109,11 @@
         "shared_mutex": "cpp",
         "source_location": "cpp",
         "typeindex": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "span": "cpp",
+        "valarray": "cpp",
+        "cfenv": "cpp",
+        "cinttypes": "cpp",
+        "set": "cpp"
     }
 }

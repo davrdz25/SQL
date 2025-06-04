@@ -11,15 +11,15 @@ class ItemRepository : public IItemRepository {
 
         ~ItemRepository(){};
         
-        std::optional<std::vector<Item>> ReadAll() override;
-        std::optional<std::vector<Item>> ReadByName(const std::string&) override;
-        std::optional<Item> ReadByEntry(const int&) override;
-        std::optional<std::vector<Item>> ReadByCodebars(const std::string&) override;
-        std::optional<std::vector<Item>> ReadByCode(const std::string&) override;
+        std::optional<std::vector<ItemModel>> ReadAll() override;
+        std::optional<std::vector<ItemModel>> ReadByName(const std::string&) override;
+        std::optional<ItemModel> ReadByEntry(const int&) override;
+        std::optional<std::vector<ItemModel>> ReadByCodebars(const std::string&) override;
+        std::optional<std::vector<ItemModel>> ReadByCode(const std::string&) override;
 
-        bool Create(const Item&) override;
-        bool Update(const Item&) override;
-        bool Delete(const Item&) override;
+        bool Create(const ItemModel&) override;
+        bool Update(const ItemModel&) override;
+        bool Delete(const ItemModel&) override;
 
     private:
         std::shared_ptr<SQL> Database;

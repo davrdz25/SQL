@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
-
 # Detectar plataforma
 if(WIN32)
     message(STATUS "Platform: Windows")
@@ -73,6 +72,7 @@ file(GLOB_RECURSE PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Adapters/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 
@@ -91,6 +91,7 @@ target_include_directories(GraphQLServer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
     ${CMAKE_CURRENT_SOURCE_DIR}/Services
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
+    ${CMAKE_CURRENT_SOURCE_DIR}/Adapters
     ${GRAPHQL_GENERATED_DIR}
 )
 
@@ -115,4 +116,3 @@ if(APPLE)
         INSTALL_RPATH "/usr/local/lib"
     )
 endif()
-

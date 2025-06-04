@@ -1,29 +1,32 @@
 #pragma once
 
-#include "graphqlservice/GraphQLService.h"
 #include "../Generated/Item/ItemObject.h"
-#include "../../Models/Item.hpp"
+#include "../../Models/ItemModel.hpp"
 
 class ItemResolver {
 public:
-    explicit ItemResolver(std::shared_ptr<Item> item) : _item(std::move(item)) {}
+    explicit ItemResolver(const ItemModel& model)
+        : m_model(model) {}
 
-    graphql::service::AwaitableScalar<std::string> getName() const {
-        co_return _item->ItemName;
+    graphql::service::AwaitableScalar<std::string> getName(graphql::service::FieldParams&&) const {
+        co_return m_model.ItemName;
     }
 
-    graphql::service::AwaitableScalar<std::string> getCode() const {
-        co_return _item->ItemCode;
+    graphql::service::AwaitableScalar<std::string> getCode(graphql::service::FieldParams&&) const {
+        co_return m_model.ItemCode;
     }
 
-    graphql::service::AwaitableScalar<std::string> getCodebars() const {
-        co_return _item->Codebars;
+    graphql::service::AwaitableScalar<std::string> getCodebars(graphql::service::FieldParams&&) const {
+        co_return m_model.Codebars;
     }
 
-    graphql::service::AwaitableScalar<double> getOnHand() const {
-        co_return _item->OnHand;
+    graphql::service::AwaitableScalar<double> getOnHand(graphql::service::FieldParams&&) const {
+        co_return static_cast<double>(m_model.OnHand);
     }
+
+    void beginSelectionSet(const graphql::service::SelectionSetParams&) const {}
+    void endSelectionSet(const graphql::service::SelectionSetParams&) const {}
 
 private:
-    std::shared_ptr<Item> _item;
+    ItemModel m_model;
 };

@@ -1,32 +1,40 @@
-// ItemQueryResolver.hpp
 #pragma once
 
 #include "../Generated/Item/QueryObject.h"
-#include "../Generated/Item/ItemObject.h"
+#include "../../Services/ItemService.hpp"
 #include "ItemResolver.hpp"
-#include "QueryResolver.hpp"
 
 #include <memory>
 #include <vector>
 
-class ItemQueryResolver final {
+class ItemQueryResolver {
 public:
-    void beginSelectionSet(const graphql::service::SelectionSetParams&) const {}
-    void endSelectionSet(const graphql::service::SelectionSetParams&) const {}
+    explicit ItemQueryResolver(std::shared_ptr<ItemService> itemService)
+        : m_itemService(std::move(itemService)) {}
 
-    graphql::service::AwaitableObject<std::vector<std::shared_ptr<graphql::item::object::Item>>> getItems(graphql::service::FieldParams&&) const {
-        QueryResolver resolver;
-        auto items = resolver.getItems();
-
+    graphql::service::AwaitableObject<std::vector<std::shared_ptr<graphql::item::object::Item>>> getItems(
+        graphql::service::FieldParams&& params) const
+    {
         std::vector<std::shared_ptr<graphql::item::object::Item>> gqlItems;
-        for (const auto& item : items) {
-            gqlItems.emplace_back(
-                std::make_shared<graphql::item::object::Item>(
-                    std::make_shared<ItemResolver>(item)
-                )
-            );
+
+        for (const auto& item : m_itemService->GetAllItems()) {
+            ItemModel model{
+                item.Entry,
+                item.ItemName,
+                item.ItemCode,
+                item.Codebars,
+                item.OnHand
+            };
+
+            auto resolver = std::make_shared<ItemResolver>(model);
+
+            // CONSTRUCTOR que toma el resolver
+            gqlItems.emplace_back(std::make_shared<graphql::item::object::Item>(std::move(resolver)));
         }
 
         co_return gqlItems;
     }
+
+private:
+    std::shared_ptr<ItemService> m_itemService;
 };

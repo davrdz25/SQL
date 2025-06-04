@@ -2,7 +2,7 @@
 
 ItemRepository::ItemRepository(std::shared_ptr<SQL> Database): Database(std::move(Database)) {}
 
-std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_ItemCode)
+std::optional<std::vector<ItemModel>> ItemRepository::ReadByCode(const std::string &_ItemCode)
 {
     try
     {
@@ -15,11 +15,11 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_
 
         if (dataTable.RowsCount() > 0)
         {
-            std::vector<Item> items;
+            std::vector<ItemModel> items;
 
             for (int i = 0; i < dataTable.RowsCount(); i++)
             {
-                items.push_back(Item{
+                items.push_back(ItemModel{
                     std::stoi(dataTable[i]["Entry"]),
                     dataTable[i]["ItemName"],
                     dataTable[i]["ItemCode"],
@@ -40,7 +40,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCode(const std::string &_
     }
 };
 
-std::optional<std::vector<Item>> ItemRepository::ReadByName(const std::string &_Name)
+std::optional<std::vector<ItemModel>> ItemRepository::ReadByName(const std::string &_Name)
 {
     try
     {
@@ -53,13 +53,13 @@ std::optional<std::vector<Item>> ItemRepository::ReadByName(const std::string &_
         if(dataTable.RowsCount() == 0)
             return std::nullopt;
             
-        std::vector<Item> items;
+        std::vector<ItemModel> items;
 
         std::cout << "Results length: " << std::to_string(dataTable.RowsCount()) << std::endl;
 
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
-            items.push_back(Item{
+            items.push_back(ItemModel{
                 std::stoi(dataTable[i]["Entry"]),
                 dataTable[i]["ItemName"],
                 dataTable[i]["ItemCode"],
@@ -78,7 +78,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadByName(const std::string &_
     }
 };
 
-std::optional<std::vector<Item>> ItemRepository::ReadByCodebars(const std::string &_Codebars)
+std::optional<std::vector<ItemModel>> ItemRepository::ReadByCodebars(const std::string &_Codebars)
 {
     try
     {
@@ -91,11 +91,11 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCodebars(const std::strin
         if (dataTable.RowsCount() == 0)
             return std::nullopt;
 
-        std::vector<Item> items;
+        std::vector<ItemModel> items;
 
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
-            items.push_back(Item{
+            items.push_back(ItemModel{
                 std::stoi(dataTable[i]["Entry"]),
                 dataTable[i]["ItemName"],
                 dataTable[i]["ItemCode"],
@@ -113,12 +113,12 @@ std::optional<std::vector<Item>> ItemRepository::ReadByCodebars(const std::strin
     }
 };
 
-std::optional<std::vector<Item>> ItemRepository::ReadAll()
+std::optional<std::vector<ItemModel>> ItemRepository::ReadAll()
 {
     try
     {
         DataTable dataTable;
-        std::vector<Item> items;
+        std::vector<ItemModel> items;
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items";
 
@@ -132,7 +132,7 @@ std::optional<std::vector<Item>> ItemRepository::ReadAll()
 
         for (int i = 0; i < dataTable.RowsCount(); i++)
         {
-            items.push_back(Item{
+            items.push_back(ItemModel{
                 std::stoi(dataTable[i]["Entry"]),
                 dataTable[i]["ItemName"],
                 dataTable[i]["ItemCode"],
@@ -150,12 +150,12 @@ std::optional<std::vector<Item>> ItemRepository::ReadAll()
     }
 };
 
-std::optional<Item> ItemRepository::ReadByEntry(const int &_Entry)
+std::optional<ItemModel> ItemRepository::ReadByEntry(const int &_Entry)
 {
     try
     {
         DataTable dataTable;
-        Item item;
+        ItemModel item;
 
         std::string Query = "SELECT [Entry], ItemName, ItemCode, Codebars, OnHand FROM Items WHERE Entry = " + std::to_string(_Entry);
 
@@ -181,7 +181,7 @@ std::optional<Item> ItemRepository::ReadByEntry(const int &_Entry)
     }
 };
 
-bool ItemRepository::Create(const Item &_Item)
+bool ItemRepository::Create(const ItemModel &_Item)
 {
     try
     {
@@ -208,7 +208,7 @@ bool ItemRepository::Create(const Item &_Item)
     }
 };
 
-bool ItemRepository::Update(const Item &_Item)
+bool ItemRepository::Update(const ItemModel &_Item)
 {
     try
     {
@@ -236,7 +236,7 @@ bool ItemRepository::Update(const Item &_Item)
     }
 };
 
-bool ItemRepository::Delete(const Item &_Item) 
+bool ItemRepository::Delete(const ItemModel &_Item) 
 {
     try
     {
