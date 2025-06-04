@@ -61,7 +61,6 @@ set(GRAPHQL_GENERATED_SOURCES
 )
 
 set(GRAPHQL_CUSTOM_RESOLVERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers/QueryResolver.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers/ItemResolver.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers/ItemQueryResolver.hpp
 )
