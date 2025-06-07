@@ -148,7 +148,7 @@ bool SQL::RunPrepared(const std::string &query, const std::vector<std::string> &
         SQLRETURN retcode;
 
         SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-        
+
         PrepareStatement(query);
 
         for (size_t i = 0; i < params.size(); ++i)
@@ -182,7 +182,6 @@ bool SQL::RunPrepared(const std::string &query, const std::vector<std::string> &
         return false;
     }
 };
-
 
 std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::string &query)
 {
@@ -231,7 +230,7 @@ std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::str
     }
     catch (const std::exception &ex)
     {
-        ExtractError("FetchPrepared", hstmt, SQL_HANDLE_STMT);
+        ExtractError("Fetch results", hstmt, SQL_HANDLE_STMT);
         std::cerr << "Excepción en FetchPrepared: " << ex.what() << std::endl;
         return results;
     }
@@ -269,6 +268,73 @@ std::vector<std::map<std::string, std::string>> SQL::FetchPrepared(const std::st
             if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
                 throw std::runtime_error("Error al enlazar parámetro " + std::to_string(i + 1));
         }
+
+        retcode = SQLExecute(hstmt);
+        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+            throw std::runtime_error("Error al ejecutar la consulta preparada.");
+
+        SQLNumResultCols(hstmt, &columnCount);
+        std::vector<std::string> columnNames;
+
+        for (SQLUSMALLINT i = 1; i <= columnCount; ++i)
+        {
+            SQLDescribeCol(hstmt, i, columnName, sizeof(columnName), &columnNameLength, &nativeType, &columnSize, &decimalDigits, &nullable);
+            columnNames.push_back(std::string(reinterpret_cast<char *>(columnName)));
+        }
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            std::map<std::string, std::string> row;
+            for (SQLUSMALLINT i = 1; i <= columnCount; ++i)
+            {
+                SQLCHAR value[256];
+                SQLLEN indicator;
+                retcode = SQLGetData(hstmt, i, SQL_C_CHAR, value, sizeof(value), &indicator);
+                row[columnNames[i - 1]] = (indicator != SQL_NULL_DATA) ? std::string(reinterpret_cast<char *>(value)) : "NULL";
+            }
+            results.push_back(row);
+        }
+
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return results;
+    }
+    catch (const std::exception &ex)
+    {
+        ExtractError("FetchPrepared", hstmt, SQL_HANDLE_STMT);
+        std::cerr << "Excepción en FetchPrepared: " << ex.what() << std::endl;
+        return results;
+    }
+};
+
+std::vector<std::map<std::string, std::string>> SQL::FetchPrepared(const std::string &query, const std::string &param)
+{
+    std::vector<std::map<std::string, std::string>> results;
+
+    try
+    {
+        SQLRETURN retcode;
+        SQLCHAR columnName[256];
+        SQLSMALLINT columnCount;
+        SQLSMALLINT columnNameLength, nativeType, decimalDigits, nullable;
+        SQLULEN columnSize;
+
+        SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+
+        PrepareStatement(query);
+
+        retcode = SQLBindParameter(
+            hstmt,
+            1,
+            SQL_PARAM_INPUT,
+            SQL_C_CHAR,
+            SQL_VARCHAR,
+            0, 0,
+            (SQLPOINTER)param.c_str(),
+            0,
+            NULL);
+
+        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+            throw std::runtime_error("Error al enlazar parámetro " + std::to_string(1));
 
         retcode = SQLExecute(hstmt);
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
