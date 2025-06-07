@@ -11,12 +11,13 @@
 #include <graphqlservice/internal/SyntaxTree.h>
 
 #include "GraphQL/Generated/Item/QueryObject.h"
-#include "GraphQL/Generated/Item/ItemSchema.h"
 #include "GraphQL/Resolvers/ItemQueryResolver.hpp"
-#include "GraphQL/Generated/Item/ItemSchema.h"
 
 #include "Repositories/ItemRepository.hpp"
 #include "Services/ItemService.hpp"
+
+#include "Repositories/User/UserRepository.hpp"
+#include "Services/User/UserService.hpp"
 
 #include <iostream>
 #include <memory>
@@ -35,14 +36,16 @@
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace websocket = beast::websocket;
+namespace asio = boost::asio;
 namespace net = boost::asio;
 namespace json = boost::json;
+namespace ssl = boost::asio::ssl; 
+
 using tcp = boost::asio::ip::tcp;
 
 using namespace graphql;
 using namespace graphql::item;
 
-#include <boost/json.hpp>
 
 boost::json::object astNodeToJson(const graphql::peg::ast_node* node)
 {
@@ -167,6 +170,7 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
         auto itemService = std::make_shared<ItemService>(itemRepository);
         auto queryResolver = std::make_shared<ItemQueryResolver>(itemService);
 
+        
         // Crear instancia de graphql::item::Operations generada por schemagen
         auto request = std::make_shared<graphql::item::Operations>(queryResolver);
 
@@ -274,6 +278,96 @@ void do_session(tcp::socket socket)
     }
 }
 
+void http_server(net::io_context& ioc, unsigned short port)
+{
+    try
+    {
+        tcp::acceptor acceptor{ioc, tcp::endpoint{tcp::v4(), port}};
+
+        for (;;)
+        {
+            tcp::socket socket{ioc};
+            acceptor.accept(socket);
+
+            std::thread{[sock = std::move(socket)]() mutable {
+                beast::flat_buffer buffer;
+                http::request<http::string_body> req;
+                http::read(sock, buffer, req);
+
+                auto database = std::make_shared<SQL>();
+                database->ServerName("192.168.1.253");
+                database->UserName("sa");
+                database->Password("Development..");
+                database->DatabaseName("POS");
+                database->TrustServerCertificate(true);
+                database->Connect();
+
+                auto res = handleGraphQLRequest(req.body(), database);
+
+                http::write(sock, res);
+                sock.shutdown(tcp::socket::shutdown_send);
+            }}.detach();
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "[HTTP Error] " << e.what() << "\n";
+    }
+}
+
+void ws_server(net::io_context& ioc, unsigned short port)
+{
+    try
+    {
+        tcp::acceptor acceptor{ioc, tcp::endpoint{tcp::v4(), port}};
+        for (;;)
+        {
+            tcp::socket socket{ioc};
+            acceptor.accept(socket);
+
+            std::thread{[s = std::move(socket)]() mutable {
+                do_session(std::move(s));
+            }}.detach();
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "[WebSocket Error] " << e.what() << "\n";
+    }
+}
+
+int main()
+{
+    try
+    {
+        net::io_context ioc;
+
+        std::thread t_http([&ioc]()
+                           {
+                               http_server(ioc, 8081);
+                               std::cerr << "[HTTP Server] Stopped.\n";
+                           });
+
+        std::thread t_ws([&ioc]()
+                         {
+                             std::cerr << "[WebSocket Server] Starting on port 9090...\n";
+                             ws_server(ioc, 9090);
+                             std::cerr << "[WebSocket Server] Stopped.\n";
+                         });
+
+        t_http.join();
+        t_ws.join();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "[FATAL] Exception: " << e.what() << "\n";
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+/* 
 int main()
 {
     try
@@ -301,4 +395,4 @@ int main()
     }
 
     return EXIT_SUCCESS;
-}
+} */
