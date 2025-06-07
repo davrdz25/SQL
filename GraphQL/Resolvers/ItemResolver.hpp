@@ -6,7 +6,9 @@
 class ItemResolver {
 public:
     explicit ItemResolver(const ItemModel& model)
-        : m_model(model) {}
+        : m_model(model) {
+            std::cout << "Entra ItemResolver" << std::endl;
+        }
 
     graphql::service::AwaitableScalar<std::string> getName(graphql::service::FieldParams&&) const {
         co_return m_model.ItemName;

@@ -10,7 +10,9 @@
 class ItemQueryResolver {
 public:
     explicit ItemQueryResolver(std::shared_ptr<ItemService> itemService)
-        : m_itemService(std::move(itemService)) {}
+        : m_itemService(std::move(itemService)) {
+            std::cout << "Entra ItemQueryResolver" << std::endl;
+        }
 
     graphql::service::AwaitableObject<std::vector<std::shared_ptr<graphql::item::object::Item>>> getItems(
         graphql::service::FieldParams&& params) const
