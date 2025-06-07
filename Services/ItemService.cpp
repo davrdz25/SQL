@@ -17,6 +17,8 @@ bool ItemService::AddItem(const ItemModel &item)
             throw std::invalid_argument("Code empty");
 
         repository->Create(item);
+        return true;
+
     }
     catch (const std::exception &Ex)
     {
