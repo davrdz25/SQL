@@ -1,0 +1,29 @@
+type User {
+  Entry: Int!
+  Code: String!
+  FirstName: String!
+  MiddleName: String
+  LastName: String!
+  Email: String!
+  Phone: String!
+  Password: String!
+}
+
+type UserQuery {
+  GetUser(Entry: Int!): User
+  GetUsers: [User!]!
+}
+
+type UserMutation {
+  CreateUser(Code: String!, FirstName: String!, MiddleName: String, LastName: String!, Email: String!, Phone: String!, Password: String!): User
+  UpdateUser(Entry: Int!, Email: String, Phone: String): User
+  ModifyPassword(Entry: Int!, OldPassword: String!, NewPassword: String!): Boolean
+}
+
+type Query {
+  User: UserQuery
+}
+
+type Mutation {
+  User: UserMutation
+}

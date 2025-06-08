@@ -71,3 +71,17 @@ UserModel UserService::GetUserByEntry(const int &iEntry)
     }
     
 };
+
+bool UserService::ModifyPassword(const int &userEntry, const std::string &oldPassword, const std::string &newPassword)
+{
+    try
+    {
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
+    
+};

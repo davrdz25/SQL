@@ -12,11 +12,13 @@ public:
     explicit UserRepository(std::shared_ptr<SQL> Database);
     ~UserRepository();
 
-    std::optional<std::vector<UserModel>>  ReadAll() override;
-    std::optional<UserModel> ReadByEntry(const int&) override;
     bool Create(const UserModel&) override;
     bool Update(const UserModel&) override;
     bool Delete(const UserModel&) override;
+    bool UpdatePassword(const int &, const std::string &, const std::string &) override;
+
+    std::optional<std::vector<UserModel>>  ReadAll() override;
+    std::optional<UserModel> ReadByEntry(const int&) override;
 
     std::optional<std::vector<UserModel>> ReadByCode(const std::string) override;
     std::optional<std::vector<UserModel>> ReadByFirstName(const std::string) override;

@@ -10,6 +10,7 @@ class UserService {
 
         bool AddUser(const UserModel&);
         bool ModifyUser(const UserModel&);
+        bool ModifyPassword(const int &, const std::string &, const std::string &);
         std::vector<UserModel> GetAllUsers();
         UserModel GetUserByEntry(const int&);
 

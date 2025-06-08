@@ -13,6 +13,10 @@
 #include "GraphQL/Generated/Item/QueryObject.h"
 #include "GraphQL/Resolvers/ItemQueryResolver.hpp"
 
+#include "GraphQL/Generated/User/QueryObject.h"
+#include "GraphQL/Resolvers/UserResolvers/UserQueryResolver.hpp"
+#include "GraphQL/Resolvers/UserResolvers/UserMutationResolver.hpp"
+
 #include "Repositories/ItemRepository.hpp"
 #include "Services/ItemService.hpp"
 
@@ -39,15 +43,14 @@ namespace websocket = beast::websocket;
 namespace asio = boost::asio;
 namespace net = boost::asio;
 namespace json = boost::json;
-namespace ssl = boost::asio::ssl; 
+namespace ssl = boost::asio::ssl;
 
 using tcp = boost::asio::ip::tcp;
 
 using namespace graphql;
 using namespace graphql::item;
 
-
-boost::json::object astNodeToJson(const graphql::peg::ast_node* node)
+boost::json::object astNodeToJson(const graphql::peg::ast_node *node)
 {
     boost::json::object jsonNode;
 
@@ -68,7 +71,7 @@ boost::json::object astNodeToJson(const graphql::peg::ast_node* node)
     if (!node->children.empty())
     {
         boost::json::array children;
-        for (const auto& child : node->children)
+        for (const auto &child : node->children)
         {
             children.emplace_back(astNodeToJson(child.get()));
         }
@@ -77,7 +80,6 @@ boost::json::object astNodeToJson(const graphql::peg::ast_node* node)
 
     return jsonNode;
 }
-
 
 void printNode(const graphql::peg::ast_node *node, int indent = 0)
 {
@@ -110,8 +112,8 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
                   << body << "\n";
 
         // Parsear JSON del body
-        auto jv = json::parse(body);
-        auto obj = jv.as_object();
+        boost::json::value jv = json::parse(body);
+        boost::json::object obj = jv.as_object();
 
         std::string operationName;
         if (obj.contains("operationName") && !obj["operationName"].is_null())
@@ -131,6 +133,7 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
                 case json::kind::object:
                 {
                     response::Value map{response::Type::Map};
+
                     for (auto &[key, val] : v.as_object())
                     {
                         map.emplace_back(std::string(key), convertJsonToResponseValue(val));
@@ -165,30 +168,74 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
             variables = convertJsonToResponseValue(obj["variables"]);
         }
 
+        // Decidir esquema (por ejemplo, por un campo "schema" en el JSON)
+        std::string schema = "Item"; // Valor por defecto si no viene schema
+        if (obj.contains("schema") && !obj["schema"].is_null())
+        {
+            schema = obj["schema"].as_string().c_str();
+        }
+
+        std::shared_ptr<graphql::service::Request> request;
+
+        if (schema == "Item")
+        {
+            auto itemRepository = std::make_shared<ItemRepository>(database);
+            auto itemService = std::make_shared<ItemService>(itemRepository);
+            auto itemQueryResolver = std::make_shared<ItemQueryResolver>(itemService);
+
+            request = std::make_shared<graphql::item::Operations>(itemQueryResolver);
+        }
+        else if (schema == "User")
+        {
+            auto userRepository = std::make_shared<UserRepository>(database);
+            auto userService = std::make_shared<UserService>(userRepository);
+
+            auto userQueryResolver = std::make_shared<UserQueryResolver>(userService);
+            auto userMutationResolver = std::make_shared<UserMutationResolver>(userService);
+
+            auto userQuery = std::make_shared<graphql::user::object::UserQuery>(userQueryResolver);
+            auto userMutation = std::make_shared<graphql::user::object::UserMutation>(userMutationResolver);
+
+            auto mutation = std::make_shared<graphql::user::object::Mutation>(userMutationResolver);
+
+            auto rootQuery = std::make_shared<graphql::user::object::Query>(userQuery);
+            auto rootMutation = std::make_shared<graphql::user::object::Mutation>(userMutation);
+
+            request = std::make_shared<graphql::user::Operations>(
+                std::move(rootQuery),
+                std::move(rootMutation)); 
+        }
+        else
+        {
+            throw std::runtime_error("Schema no soportado");
+        }
+
         // Resolver GraphQL
-        auto itemRepository = std::make_shared<ItemRepository>(database);
-        auto itemService = std::make_shared<ItemService>(itemRepository);
-        auto queryResolver = std::make_shared<ItemQueryResolver>(itemService);
+        /* std::shared_ptr<ItemRepository> itemRepository = std::make_shared<ItemRepository>(database);
+        std::shared_ptr<ItemService> itemService = std::make_shared<ItemService>(itemRepository);
+        std::shared_ptr<ItemQueryResolver> queryResolver = std::make_shared<ItemQueryResolver>(itemService);
 
-        
+
         // Crear instancia de graphql::item::Operations generada por schemagen
-        auto request = std::make_shared<graphql::item::Operations>(queryResolver);
-
+        std::shared_ptr<graphql::item::Operations> request = std::make_shared<graphql::item::Operations>(queryResolver);
+ */
         // Parsear query
         std::string queryStr = obj["query"].as_string().c_str();
         std::cerr << "📝 Ejecutando Query:\n"
                   << queryStr << "\n";
 
-        auto ast = graphql::peg::parseString(queryStr);
+        graphql::peg::ast ast = graphql::peg::parseString(queryStr);
+
         if (!ast.root)
         {
             throw std::runtime_error("❌ Error al parsear la consulta GraphQL.");
         }
 
         std::cout << "✅ AST parseado correctamente\n";
-        
-        auto jsonAst = astNodeToJson(ast.root.get());
-        std::cout << "📤 AST (JSON):\n" << boost::json::serialize(jsonAst) << "\n";
+
+        boost::json::object jsonAst = astNodeToJson(ast.root.get());
+        std::cout << "📤 AST (JSON):\n"
+                  << boost::json::serialize(jsonAst) << "\n";
 
         service::RequestResolveParams params{
             ast,
@@ -278,7 +325,7 @@ void do_session(tcp::socket socket)
     }
 }
 
-void http_server(net::io_context& ioc, unsigned short port)
+void http_server(net::io_context &ioc, unsigned short port)
 {
     try
     {
@@ -289,33 +336,35 @@ void http_server(net::io_context& ioc, unsigned short port)
             tcp::socket socket{ioc};
             acceptor.accept(socket);
 
-            std::thread{[sock = std::move(socket)]() mutable {
-                beast::flat_buffer buffer;
-                http::request<http::string_body> req;
-                http::read(sock, buffer, req);
+            std::thread{[sock = std::move(socket)]() mutable
+                        {
+                            beast::flat_buffer buffer;
+                            http::request<http::string_body> req;
+                            http::read(sock, buffer, req);
 
-                auto database = std::make_shared<SQL>();
-                database->ServerName("192.168.1.253");
-                database->UserName("sa");
-                database->Password("Development..");
-                database->DatabaseName("POS");
-                database->TrustServerCertificate(true);
-                database->Connect();
+                            auto database = std::make_shared<SQL>();
+                            database->ServerName("192.168.1.253");
+                            database->UserName("sa");
+                            database->Password("Development..");
+                            database->DatabaseName("POS");
+                            database->TrustServerCertificate(true);
+                            database->Connect();
 
-                auto res = handleGraphQLRequest(req.body(), database);
+                            auto res = handleGraphQLRequest(req.body(), database);
 
-                http::write(sock, res);
-                sock.shutdown(tcp::socket::shutdown_send);
-            }}.detach();
+                            http::write(sock, res);
+                            sock.shutdown(tcp::socket::shutdown_send);
+                        }}
+                .detach();
         }
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << "[HTTP Error] " << e.what() << "\n";
     }
 }
 
-void ws_server(net::io_context& ioc, unsigned short port)
+void ws_server(net::io_context &ioc, unsigned short port)
 {
     try
     {
@@ -325,12 +374,14 @@ void ws_server(net::io_context& ioc, unsigned short port)
             tcp::socket socket{ioc};
             acceptor.accept(socket);
 
-            std::thread{[s = std::move(socket)]() mutable {
-                do_session(std::move(s));
-            }}.detach();
+            std::thread{[s = std::move(socket)]() mutable
+                        {
+                            do_session(std::move(s));
+                        }}
+                .detach();
         }
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << "[WebSocket Error] " << e.what() << "\n";
     }
@@ -345,15 +396,12 @@ int main()
         std::thread t_http([&ioc]()
                            {
                                http_server(ioc, 8081);
-                               std::cerr << "[HTTP Server] Stopped.\n";
-                           });
+                               std::cerr << "[HTTP Server] Stopped.\n"; });
 
         std::thread t_ws([&ioc]()
                          {
-                             std::cerr << "[WebSocket Server] Starting on port 9090...\n";
                              ws_server(ioc, 9090);
-                             std::cerr << "[WebSocket Server] Stopped.\n";
-                         });
+                             std::cerr << "[WebSocket Server] Stopped.\n"; });
 
         t_http.join();
         t_ws.join();
@@ -366,33 +414,3 @@ int main()
 
     return EXIT_SUCCESS;
 }
-
-/* 
-int main()
-{
-    try
-    {
-        net::io_context ioc{1};
-        tcp::acceptor acceptor{ioc, tcp::endpoint(tcp::v4(), 8082)};
-        std::cout << "Servidor GraphQL WebSocket escuchando en ws://localhost:8082/\n";
-
-        while (true)
-        {
-            tcp::socket socket{ioc};
-            acceptor.accept(socket);
-
-            std::thread{[s = std::move(socket)]() mutable
-                        {
-                            do_session(std::move(s));
-                        }}
-                .detach();
-        }
-    }
-    catch (std::exception const &e)
-    {
-        std::cerr << "Error en servidor: " << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-} */
