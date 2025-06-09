@@ -191,11 +191,18 @@ std::optional<std::vector<UserModel>> UserRepository::ReadByEmail(const std::str
     }
 };
 
-bool UserRepository::UpdatePassword(const int &userEntry, const std::string &oldPassword, const std::string &newPassword)
+bool UserRepository::UpdatePassword(const int &userEntry, const std::string &newPassword)
 {
     try
     {
+        const std::string sQuery = "UPDATE Users SET Password = ? WHERE UserEntry = ?";
+        const std::vector<std::string> vParams = {
+            std::to_string(userEntry),
+            newPassword
+        };
+
         return true;
+
     }
     catch(const std::exception& e)
     {
@@ -203,4 +210,4 @@ bool UserRepository::UpdatePassword(const int &userEntry, const std::string &old
         return false;
     }
     
-}
+};

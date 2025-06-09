@@ -15,7 +15,6 @@ public:
     bool Create(const UserModel&) override;
     bool Update(const UserModel&) override;
     bool Delete(const UserModel&) override;
-    bool UpdatePassword(const int &, const std::string &, const std::string &) override;
 
     std::optional<std::vector<UserModel>>  ReadAll() override;
     std::optional<UserModel> ReadByEntry(const int&) override;
@@ -25,4 +24,6 @@ public:
     std::optional<std::vector<UserModel>> ReadByLastName(const std::string) override;
     std::optional<std::vector<UserModel>> ReadByPhone(const std::string) override;
     std::optional<std::vector<UserModel>> ReadByEmail(const std::string) override;
+    bool UpdatePassword(const int &, const std::string &) override;
+
 };
