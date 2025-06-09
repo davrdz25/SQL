@@ -24,7 +24,7 @@ public:
         co_return m_model.LastName;
     }
 
-    graphql::service::AwaitableScalar<std::string> getMiddleName(graphql::service::FieldParams&&) const {
+    graphql::service::AwaitableScalar<std::optional<std::string>> getMiddleName(graphql::service::FieldParams&&) const {
         co_return m_model.MiddleName;
     }
 

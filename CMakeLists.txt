@@ -57,20 +57,20 @@ set(GRAPHQL_RESOLVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers)
 
 
 set(GRAPHQL_GENERATED_SOURCES
-    ${GRAPHQL_GENERATED_DIR}/Item/ItemObject.cpp
-    ${GRAPHQL_GENERATED_DIR}/Item/ItemSchema.cpp
-    ${GRAPHQL_GENERATED_DIR}/Item/QueryObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/UserObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/UserSchema.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/QueryObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/MutationObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/UserQueryObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/UserMutationObject.cpp
 )
 
 set(GRAPHQL_CUSTOM_RESOLVERS
     ${GRAPHQL_RESOLVERS_DIR}/ItemResolver.hpp
     ${GRAPHQL_RESOLVERS_DIR}/ItemQueryResolver.hpp
-    ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserQueryResolver.hpp
     ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserResolver.hpp
+    ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserQueryResolver.hpp
     ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserMutationResolver.hpp
-)
-
-set(GRAPHQL_CUSTOM_MUTATIONS
 )
 
 file(GLOB_RECURSE PROJECT_SOURCES
@@ -79,7 +79,6 @@ file(GLOB_RECURSE PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Adapters/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 
@@ -87,8 +86,8 @@ list(APPEND PROJECT_SOURCES ${GRAPHQL_CUSTOM_RESOLVERS}
 )
 
 add_executable(GraphQLServer
-    ${PROJECT_SOURCES}
     ${GRAPHQL_GENERATED_SOURCES}
+    ${PROJECT_SOURCES}
 )
 
 target_include_directories(GraphQLServer PRIVATE
@@ -99,7 +98,6 @@ target_include_directories(GraphQLServer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
     ${CMAKE_CURRENT_SOURCE_DIR}/Services
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
-    ${CMAKE_CURRENT_SOURCE_DIR}/Adapters
     ${GRAPHQL_GENERATED_DIR}
 )
 

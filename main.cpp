@@ -10,15 +10,16 @@
 #include <graphqlservice/internal/Grammar.h>
 #include <graphqlservice/internal/SyntaxTree.h>
 
-#include "GraphQL/Generated/Item/QueryObject.h"
-#include "GraphQL/Resolvers/ItemQueryResolver.hpp"
 
-#include "GraphQL/Generated/User/QueryObject.h"
 #include "GraphQL/Resolvers/UserResolvers/UserQueryResolver.hpp"
 #include "GraphQL/Resolvers/UserResolvers/UserMutationResolver.hpp"
 
-#include "Repositories/ItemRepository.hpp"
-#include "Services/ItemService.hpp"
+#include "GraphQL/Resolvers/RootQueryResolver.hpp"
+#include "GraphQL/Resolvers/RootMutationResolver.hpp"
+
+#include "GraphQL/Generated/User/MutationObject.h"
+#include "GraphQL/Generated/User/QueryObject.h"
+
 
 #include "Repositories/User/UserRepository.hpp"
 #include "Services/User/UserService.hpp"
@@ -48,7 +49,7 @@ namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
 using namespace graphql;
-using namespace graphql::item;
+//using namespace graphql::item;
 
 boost::json::object astNodeToJson(const graphql::peg::ast_node *node)
 {
@@ -108,10 +109,9 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
 {
     try
     {
-        std::cout << "📦 Request body:\n"
+        std::cout << "Request body:\n"
                   << body << "\n";
 
-        // Parsear JSON del body
         boost::json::value jv = json::parse(body);
         boost::json::object obj = jv.as_object();
 
@@ -121,7 +121,6 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
             operationName = obj["operationName"].as_string().c_str();
         }
 
-        // Parsear variables
         response::Value variables{response::Type::Map};
         if (obj.contains("variables") && !obj["variables"].is_null())
         {
@@ -168,8 +167,7 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
             variables = convertJsonToResponseValue(obj["variables"]);
         }
 
-        // Decidir esquema (por ejemplo, por un campo "schema" en el JSON)
-        std::string schema = "Item"; // Valor por defecto si no viene schema
+        std::string schema = "Item";
         if (obj.contains("schema") && !obj["schema"].is_null())
         {
             schema = obj["schema"].as_string().c_str();
@@ -177,64 +175,47 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
 
         std::shared_ptr<graphql::service::Request> request;
 
-        if (schema == "Item")
-        {
-            auto itemRepository = std::make_shared<ItemRepository>(database);
-            auto itemService = std::make_shared<ItemService>(itemRepository);
-            auto itemQueryResolver = std::make_shared<ItemQueryResolver>(itemService);
-
-            request = std::make_shared<graphql::item::Operations>(itemQueryResolver);
-        }
-        else if (schema == "User")
+        if (schema == "User")
         {
             auto userRepository = std::make_shared<UserRepository>(database);
             auto userService = std::make_shared<UserService>(userRepository);
 
-            auto userQueryResolver = std::make_shared<UserQueryResolver>(userService);
-            auto userMutationResolver = std::make_shared<UserMutationResolver>(userService);
+            auto userQ = std::make_shared<UserQueryResolver>(userService);
+            auto userM = std::make_shared<UserMutationResolver>(userService);
 
-            auto userQuery = std::make_shared<graphql::user::object::UserQuery>(userQueryResolver);
-            auto userMutation = std::make_shared<graphql::user::object::UserMutation>(userMutationResolver);
+            auto rootQ = std::make_shared<graphql::resolvers::RootQueryResolver>(userQ);
+            auto rootM = std::make_shared<graphql::resolvers::RootMutationResolver>(userM);
 
-            auto mutation = std::make_shared<graphql::user::object::Mutation>(userMutationResolver);
+            auto qObj = std::shared_ptr<graphql::user::object::Query>(
+                new graphql::user::object::Query(rootQ)
+            );
+            auto mObj = std::shared_ptr<graphql::user::object::Mutation>(new graphql::user::object::Mutation(rootM));
 
-            auto rootQuery = std::make_shared<graphql::user::object::Query>(userQuery);
-            auto rootMutation = std::make_shared<graphql::user::object::Mutation>(userMutation);
-
-            request = std::make_shared<graphql::user::Operations>(
-                std::move(rootQuery),
-                std::move(rootMutation)); 
+            auto request = std::make_shared<graphql::user::Operations>(
+                qObj,
+                mObj
+            );
         }
         else
         {
             throw std::runtime_error("Schema no soportado");
         }
 
-        // Resolver GraphQL
-        /* std::shared_ptr<ItemRepository> itemRepository = std::make_shared<ItemRepository>(database);
-        std::shared_ptr<ItemService> itemService = std::make_shared<ItemService>(itemRepository);
-        std::shared_ptr<ItemQueryResolver> queryResolver = std::make_shared<ItemQueryResolver>(itemService);
-
-
-        // Crear instancia de graphql::item::Operations generada por schemagen
-        std::shared_ptr<graphql::item::Operations> request = std::make_shared<graphql::item::Operations>(queryResolver);
- */
-        // Parsear query
         std::string queryStr = obj["query"].as_string().c_str();
-        std::cerr << "📝 Ejecutando Query:\n"
+        std::cerr << "Ejecutando Query:\n"
                   << queryStr << "\n";
 
         graphql::peg::ast ast = graphql::peg::parseString(queryStr);
 
         if (!ast.root)
         {
-            throw std::runtime_error("❌ Error al parsear la consulta GraphQL.");
+            throw std::runtime_error("Error al parsear la consulta GraphQL.");
         }
 
-        std::cout << "✅ AST parseado correctamente\n";
+        std::cout << "AST parseado correctamente\n";
 
         boost::json::object jsonAst = astNodeToJson(ast.root.get());
-        std::cout << "📤 AST (JSON):\n"
+        std::cout << "AST (JSON):\n"
                   << boost::json::serialize(jsonAst) << "\n";
 
         service::RequestResolveParams params{

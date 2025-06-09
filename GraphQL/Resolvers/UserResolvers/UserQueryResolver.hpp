@@ -1,5 +1,6 @@
 #pragma once
 
+#include <graphqlservice/GraphQLService.h>
 #include "../Generated/User/UserQueryObject.h"
 #include "UserResolver.hpp"
 #include "../../Services/User/UserService.hpp"
@@ -18,16 +19,12 @@ public:
     {
         // Aquí tu lógica para obtener un usuario
         auto model = m_userService->GetUserByEntry(entry);
-        if (!model.has_value())
-        {
-            co_return nullptr;
-        }
 
-        auto resolver = std::make_shared<UserResolver>(model.value());
+        auto resolver = std::make_shared<UserResolver>(model);
         co_return std::make_shared<graphql::user::object::User>(std::move(resolver));
     }
 
-    graphql::service::AwaitableObject<std::vector<std::shared_ptr<graphql::user::object::User>>> listUsers(
+    graphql::service::AwaitableObject<std::vector<std::shared_ptr<graphql::user::object::User>>> getGetUsers(
         graphql::service::FieldParams &&) const
     {
         std::vector<std::shared_ptr<graphql::user::object::User>> gqlUsers;

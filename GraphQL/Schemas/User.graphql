@@ -16,7 +16,7 @@ type UserQuery {
 
 type UserMutation {
   CreateUser(Code: String!, FirstName: String!, MiddleName: String, LastName: String!, Email: String!, Phone: String!, Password: String!): User
-  UpdateUser(Entry: Int!, Email: String, Phone: String): User
+  UpdateUser(Entry: Int!, FirstName: String, MiddleName: String, LastName: String, Email: String, Phone: String): User
   ModifyPassword(Entry: Int!, OldPassword: String!, NewPassword: String!): Boolean
 }
 

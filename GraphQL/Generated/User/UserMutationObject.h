@@ -26,15 +26,15 @@ concept getCreateUser = requires (TImpl impl, std::string CodeArg, std::string F
 };
 
 template <class TImpl>
-concept getUpdateUserWithParams = requires (TImpl impl, service::FieldParams params, int EntryArg, std::optional<std::string> EmailArg, std::optional<std::string> PhoneArg)
+concept getUpdateUserWithParams = requires (TImpl impl, service::FieldParams params, int EntryArg, std::optional<std::string> FirstNameArg, std::optional<std::string> MiddleNameArg, std::optional<std::string> LastNameArg, std::optional<std::string> EmailArg, std::optional<std::string> PhoneArg)
 {
-	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getUpdateUser(std::move(params), std::move(EntryArg), std::move(EmailArg), std::move(PhoneArg)) } };
+	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getUpdateUser(std::move(params), std::move(EntryArg), std::move(FirstNameArg), std::move(MiddleNameArg), std::move(LastNameArg), std::move(EmailArg), std::move(PhoneArg)) } };
 };
 
 template <class TImpl>
-concept getUpdateUser = requires (TImpl impl, int EntryArg, std::optional<std::string> EmailArg, std::optional<std::string> PhoneArg)
+concept getUpdateUser = requires (TImpl impl, int EntryArg, std::optional<std::string> FirstNameArg, std::optional<std::string> MiddleNameArg, std::optional<std::string> LastNameArg, std::optional<std::string> EmailArg, std::optional<std::string> PhoneArg)
 {
-	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getUpdateUser(std::move(EntryArg), std::move(EmailArg), std::move(PhoneArg)) } };
+	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getUpdateUser(std::move(EntryArg), std::move(FirstNameArg), std::move(MiddleNameArg), std::move(LastNameArg), std::move(EmailArg), std::move(PhoneArg)) } };
 };
 
 template <class TImpl>
@@ -81,7 +81,7 @@ private:
 		virtual void endSelectionSet(const service::SelectionSetParams& params) const = 0;
 
 		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<User>> getCreateUser(service::FieldParams&& params, std::string&& CodeArg, std::string&& FirstNameArg, std::optional<std::string>&& MiddleNameArg, std::string&& LastNameArg, std::string&& EmailArg, std::string&& PhoneArg, std::string&& PasswordArg) const = 0;
-		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<User>> getUpdateUser(service::FieldParams&& params, int&& EntryArg, std::optional<std::string>&& EmailArg, std::optional<std::string>&& PhoneArg) const = 0;
+		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<User>> getUpdateUser(service::FieldParams&& params, int&& EntryArg, std::optional<std::string>&& FirstNameArg, std::optional<std::string>&& MiddleNameArg, std::optional<std::string>&& LastNameArg, std::optional<std::string>&& EmailArg, std::optional<std::string>&& PhoneArg) const = 0;
 		[[nodiscard("unnecessary call")]] virtual service::AwaitableScalar<std::optional<bool>> getModifyPassword(service::FieldParams&& params, int&& EntryArg, std::string&& OldPasswordArg, std::string&& NewPasswordArg) const = 0;
 	};
 
@@ -107,16 +107,16 @@ private:
 			}
 		}
 
-		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::shared_ptr<User>> getUpdateUser(service::FieldParams&& params, int&& EntryArg, std::optional<std::string>&& EmailArg, std::optional<std::string>&& PhoneArg) const override
+		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::shared_ptr<User>> getUpdateUser(service::FieldParams&& params, int&& EntryArg, std::optional<std::string>&& FirstNameArg, std::optional<std::string>&& MiddleNameArg, std::optional<std::string>&& LastNameArg, std::optional<std::string>&& EmailArg, std::optional<std::string>&& PhoneArg) const override
 		{
 			if constexpr (methods::UserMutationHas::getUpdateUserWithParams<T>)
 			{
-				return { _pimpl->getUpdateUser(std::move(params), std::move(EntryArg), std::move(EmailArg), std::move(PhoneArg)) };
+				return { _pimpl->getUpdateUser(std::move(params), std::move(EntryArg), std::move(FirstNameArg), std::move(MiddleNameArg), std::move(LastNameArg), std::move(EmailArg), std::move(PhoneArg)) };
 			}
 			else
 			{
 				static_assert(methods::UserMutationHas::getUpdateUser<T>, R"msg(UserMutation::getUpdateUser is not implemented)msg");
-				return { _pimpl->getUpdateUser(std::move(EntryArg), std::move(EmailArg), std::move(PhoneArg)) };
+				return { _pimpl->getUpdateUser(std::move(EntryArg), std::move(FirstNameArg), std::move(MiddleNameArg), std::move(LastNameArg), std::move(EmailArg), std::move(PhoneArg)) };
 			}
 		}
 

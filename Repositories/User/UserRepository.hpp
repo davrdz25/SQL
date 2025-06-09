@@ -10,7 +10,7 @@ private:
         std::shared_ptr<SQL> Database;
 public:
     explicit UserRepository(std::shared_ptr<SQL> Database);
-    ~UserRepository();
+    ~UserRepository(){};
 
     bool Create(const UserModel&) override;
     bool Update(const UserModel&) override;

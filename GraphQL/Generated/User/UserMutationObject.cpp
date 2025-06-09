@@ -75,12 +75,15 @@ service::AwaitableResolver UserMutation::resolveCreateUser(service::ResolverPara
 service::AwaitableResolver UserMutation::resolveUpdateUser(service::ResolverParams&& params) const
 {
 	auto argEntry = service::ModifiedArgument<int>::require("Entry", params.arguments);
+	auto argFirstName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("FirstName", params.arguments);
+	auto argMiddleName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("MiddleName", params.arguments);
+	auto argLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("LastName", params.arguments);
 	auto argEmail = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Email", params.arguments);
 	auto argPhone = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Phone", params.arguments);
 	std::unique_lock resolverLock(_resolverMutex);
 	service::SelectionSetParams selectionSetParams { static_cast<const service::SelectionSetParams&>(params) };
 	auto directives = std::move(params.fieldDirectives);
-	auto result = _pimpl->getUpdateUser(service::FieldParams { std::move(selectionSetParams), std::move(directives) }, std::move(argEntry), std::move(argEmail), std::move(argPhone));
+	auto result = _pimpl->getUpdateUser(service::FieldParams { std::move(selectionSetParams), std::move(directives) }, std::move(argEntry), std::move(argFirstName), std::move(argMiddleName), std::move(argLastName), std::move(argEmail), std::move(argPhone));
 	resolverLock.unlock();
 
 	return service::ModifiedResult<User>::convert<service::TypeModifier::Nullable>(std::move(result), std::move(params));
@@ -121,6 +124,9 @@ void AddUserMutationDetails(const std::shared_ptr<schema::ObjectType>& typeUserM
 		}),
 		schema::Field::Make(R"gql(UpdateUser)gql"sv, R"md()md"sv, std::nullopt, schema->LookupType(R"gql(User)gql"sv), {
 			schema::InputValue::Make(R"gql(Entry)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(Int)gql"sv)), R"gql()gql"sv),
+			schema::InputValue::Make(R"gql(FirstName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+			schema::InputValue::Make(R"gql(MiddleName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+			schema::InputValue::Make(R"gql(LastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
 			schema::InputValue::Make(R"gql(Email)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
 			schema::InputValue::Make(R"gql(Phone)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv)
 		}),
