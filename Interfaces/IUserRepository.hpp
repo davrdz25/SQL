@@ -14,5 +14,5 @@ class IUserRepository : public IBaseRepository<UserModel>
         virtual std::optional<std::vector<UserModel>> ReadByLastName(const std::string) = 0;
         virtual std::optional<std::vector<UserModel>> ReadByPhone(const std::string) = 0;
         virtual std::optional<std::vector<UserModel>> ReadByEmail(const std::string) = 0;
-        virtual bool UpdatePassword(const int &, const std::string &, const std::string &) = 0;
+        virtual bool UpdatePassword(const int &, const std::string &) = 0;
 };

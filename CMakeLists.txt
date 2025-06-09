@@ -66,8 +66,6 @@ set(GRAPHQL_GENERATED_SOURCES
 )
 
 set(GRAPHQL_CUSTOM_RESOLVERS
-    ${GRAPHQL_RESOLVERS_DIR}/ItemResolver.hpp
-    ${GRAPHQL_RESOLVERS_DIR}/ItemQueryResolver.hpp
     ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserResolver.hpp
     ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserQueryResolver.hpp
     ${GRAPHQL_RESOLVERS_DIR}/UserResolvers/UserMutationResolver.hpp
