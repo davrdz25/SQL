@@ -37,6 +37,7 @@ class SQL : public ISQL{
         std::vector<std::map<std::string, std::string>> FetchResults(const std::string&) override;
 
         bool RunPrepared(const std::string&, const std::vector<std::string>&) override;
+        bool RunPrepared(const std::string &,const std::vector<std::string> &, const std::vector<std::vector<uint8_t>> &) override;
         std::vector<std::map<std::string, std::string>> FetchPrepared(const std::string&, const std::vector<std::string>&) override;
         std::vector<std::map<std::string, std::string>> FetchPrepared(const std::string&, const std::string&) override;
     };

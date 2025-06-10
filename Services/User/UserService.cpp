@@ -1,6 +1,7 @@
 #include "UserService.hpp"
 
-UserService::UserService(std::shared_ptr<IUserRepository> userRepository) {};
+UserService::UserService(std::shared_ptr<IUserRepository> userRepository)
+    : userRepository(std::move(userRepository)) {}
 
 bool UserService::AddUser(const UserModel &uNewUser)
 {
@@ -21,6 +22,7 @@ bool UserService::AddUser(const UserModel &uNewUser)
         if(uNewUser.Phone.length() == 0)
             throw std::invalid_argument("Phone is empty");
 
+
         userRepository->Create(uNewUser);
 
         return true;
@@ -28,7 +30,7 @@ bool UserService::AddUser(const UserModel &uNewUser)
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-        return false;
+        throw std::runtime_error(e.what());
     }
     
 };

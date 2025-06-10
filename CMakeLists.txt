@@ -39,6 +39,11 @@ if(NOT BOOST_JSON_LIB)
     message(FATAL_ERROR "Boost.JSON library not found")
 endif()
 
+find_library(SODIUM_LIB sodium REQUIRED)
+if(NOT SODIUM_LIB)
+    message(FATAL_ERROR "libsodium no encontrada")
+endif()
+
 find_package(Threads REQUIRED)
 
 # Buscar librerías graphql
@@ -77,6 +82,7 @@ file(GLOB_RECURSE PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 
@@ -91,6 +97,7 @@ add_executable(GraphQLServer
 target_include_directories(GraphQLServer PRIVATE
     ${GRAPHQLPARSER_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils
     ${CMAKE_CURRENT_SOURCE_DIR}/Database
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
@@ -105,6 +112,7 @@ target_link_libraries(GraphQLServer PRIVATE
     ${Boost_LIBRARIES}
     Threads::Threads
     ${BOOST_JSON_LIB}
+    ${SODIUM_LIB}
     ${GRAPHQLJSON_LIB}  
     ${GRAPHQLPEG_LIB}          
     ${GRAPHQLRESPONSE_LIB}      

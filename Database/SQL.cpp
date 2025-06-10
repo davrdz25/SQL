@@ -71,10 +71,11 @@ bool SQL::Connect()
 
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         {
-
             throw std::runtime_error("Error conecting database\n");
             return false;
         }
+        
+        std::cout << "Conectado a la base de datos" << std::endl;
         return true;
     }
     catch (const std::exception &Ex)
@@ -182,6 +183,73 @@ bool SQL::RunPrepared(const std::string &query, const std::vector<std::string> &
         return false;
     }
 };
+
+bool SQL::RunPrepared(const std::string &query,
+                      const std::vector<std::string> &params,
+                      const std::vector<std::vector<uint8_t>> &binaryParams)
+{
+    try
+    {
+        SQLRETURN retcode;
+        SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+
+        PrepareStatement(query);
+
+        size_t paramIndex = 1;
+        size_t strIndex = 0;
+        size_t binIndex = 0;
+
+        for (; strIndex < params.size(); ++strIndex, ++paramIndex)
+        {
+            retcode = SQLBindParameter(
+                hstmt,
+                paramIndex,
+                SQL_PARAM_INPUT,
+                SQL_C_CHAR,
+                SQL_VARCHAR,
+                0, 0,
+                (SQLPOINTER)params[strIndex].c_str(),
+                0,
+                NULL);
+
+            if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+                throw std::runtime_error("Error al enlazar parámetro de texto " + std::to_string(paramIndex));
+        }
+
+        for (; binIndex < binaryParams.size(); ++binIndex, ++paramIndex)
+        {
+            SQLLEN dataSize = static_cast<SQLLEN>(binaryParams[binIndex].size());
+
+            retcode = SQLBindParameter(
+                hstmt,
+                paramIndex,
+                SQL_PARAM_INPUT,
+                SQL_C_BINARY,
+                SQL_VARBINARY,
+                dataSize, 0,
+                (SQLPOINTER)binaryParams[binIndex].data(),
+                dataSize,
+                &dataSize);
+
+            if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+                throw std::runtime_error("Error al enlazar parámetro binario " + std::to_string(paramIndex));
+        }
+
+        retcode = SQLExecute(hstmt);
+        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+            throw std::runtime_error("Error al ejecutar la consulta preparada.");
+
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return true;
+    }
+    catch (const std::exception &ex)
+    {
+        ExtractError("RunPrepared", hstmt, SQL_HANDLE_STMT);
+        std::cerr << "Excepción en RunPrepared: " << ex.what() << std::endl;
+        throw std::runtime_error(ex.what());
+        return false;
+    }
+}
 
 std::vector<std::map<std::string, std::string>> SQL::FetchResults(const std::string &query)
 {

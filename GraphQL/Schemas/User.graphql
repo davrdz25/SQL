@@ -8,6 +8,32 @@ type User {
   Phone: String!
   Password: String!
 }
+ 
+input UserInput {
+  Code: String,
+  Email: String,
+  Phone: String,
+  Password:String!
+}
+
+type Session {
+  Entry: Int!
+  SessionID: String!
+  User: User!
+  StartDate: Timestamp!
+  EndDate: Timestpam
+  Token: String
+}
+
+type SessionQuery {
+  GetAllSessions: [Session!]!
+  GetSessionsByDate: (StartDate: Timestamp!): [Session!]!
+  GetActiveSessions: [Session!]!
+}
+
+type SessionMutation {
+  CreateSession(User: UserInput!)
+}
 
 type UserQuery {
   GetUser(Entry: Int!): User

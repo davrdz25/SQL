@@ -17,7 +17,6 @@ public:
     graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::User>> getGetUser(
         int entry) const
     {
-        // Aquí tu lógica para obtener un usuario
         auto model = m_userService->GetUserByEntry(entry);
 
         auto resolver = std::make_shared<UserResolver>(model);

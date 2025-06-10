@@ -1,4 +1,5 @@
 #include "UserRepository.hpp"
+#include "../../Utils/Hasher.hpp"
 
 UserRepository::UserRepository(std::shared_ptr<SQL> Database) : Database(std::move(Database)) {}
 
@@ -73,32 +74,42 @@ std::optional<UserModel> UserRepository::ReadByEntry(const int &iEntry)
     }
 };
 
+
 bool UserRepository::Create(const UserModel &uNewuser)
 {
     try
     {
-        std::string sQuery = "INSERT INTO Users ([Entry], UserCode, FirstName, MiddleName, Email, Phone, Password)";
-        std::vector<std::string> vParams = {
+        std::vector<uint8_t> hashedPassword = Hasher::HashPassword(uNewuser.Password);
+
+        std::string sQuery = "INSERT INTO Users (UserEntry, UserCode, FirstName, MiddleName, LastName, Email, Phone, Password) "
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        std::vector<std::string> stringParams = {
             std::to_string(uNewuser.Entry),
             uNewuser.Code,
             uNewuser.FirstName,
             uNewuser.MiddleName,
             uNewuser.LastName,
-            uNewuser.Phone,
-            uNewuser.Password
+            uNewuser.Email,
+            uNewuser.Phone
+        }; 
+
+        std::vector<std::vector<uint8_t>> binaryParams = {
+            hashedPassword
         };
 
-        if(Database->RunPrepared(sQuery, vParams))
+        if (Database->RunPrepared(sQuery, stringParams, binaryParams))
             return true;
 
         return false;
     }
     catch (const std::exception &e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[CreateUser Exception] " << e.what() << '\n';
+        throw std::runtime_error(e.what());
         return false;
     }
-};
+}
 
 bool UserRepository::Update(const UserModel &)
 {
@@ -143,7 +154,7 @@ std::optional<std::vector<UserModel>> UserRepository::ReadByFirstName(const std:
 {
     try
     {
-        /* code */
+        
     }
     catch (const std::exception &e)
     {
@@ -156,7 +167,7 @@ std::optional<std::vector<UserModel>> UserRepository::ReadByLastName(const std::
 {
     try
     {
-        /* code */
+        
     }
     catch (const std::exception &e)
     {
@@ -169,7 +180,7 @@ std::optional<std::vector<UserModel>> UserRepository::ReadByPhone(const std::str
 {
     try
     {
-        /* code */
+        
     }
     catch (const std::exception &e)
     {
@@ -182,7 +193,7 @@ std::optional<std::vector<UserModel>> UserRepository::ReadByEmail(const std::str
 {
     try
     {
-        /* code */
+        
     }
     catch (const std::exception &e)
     {

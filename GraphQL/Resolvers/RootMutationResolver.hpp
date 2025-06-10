@@ -1,11 +1,8 @@
-// File: GraphQL/Resolvers/RootMutationResolver.hpp
-
 #pragma once
 #include <graphqlservice/GraphQLService.h>
 #include <memory>
 #include "../Generated/User/MutationObject.h"  
-#include "UserResolvers/UserMutationResolver.hpp" // tu resolver anidado
-   // object::UserMutation
+#include "UserResolvers/UserMutationResolver.hpp"
 
 namespace graphql::resolvers
 {
@@ -30,4 +27,4 @@ namespace graphql::resolvers
         void endSelectionSet(const service::SelectionSetParams &) const {}
     };
 
-} // namespace graphql::resolvers
+}

@@ -9,8 +9,8 @@
 #include "../../../Services/User/UserService.hpp"
 #include "../../../Models/UserModel.hpp"
 
-
-class UserMutationResolver {
+class UserMutationResolver
+{
 private:
     std::shared_ptr<UserService> m_userService;
 
@@ -21,7 +21,7 @@ public:
     }
 
     graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::User>> getCreateUser(
-        graphql::service::FieldParams&& params,
+        graphql::service::FieldParams &&params,
         std::string _Code,
         std::string _FirstName,
         std::optional<std::string> _MiddleName,
@@ -30,24 +30,33 @@ public:
         std::string _Phone,
         std::string _Password) const
     {
-        UserModel userModel{
-        .Code = std::move(_Code),
-        .FirstName = std::move(_FirstName),
-        .MiddleName = std::move(_MiddleName.value()),
-        .LastName = std::move(_LastName),
-        .Email = std::move(_Email),
-        .Phone = std::move(_Phone),
-        .Password = std::move(_Password),
-    };
+        try
+        {
+            UserModel userModel{
+                .Code = std::move(_Code),
+                .FirstName = std::move(_FirstName),
+                .MiddleName = std::move(_MiddleName.value()),
+                .LastName = std::move(_LastName),
+                .Email = std::move(_Email),
+                .Phone = std::move(_Phone),
+                .Password = std::move(_Password),
+            };
 
-        auto model = m_userService->AddUser(userModel);
-        auto resolver = std::make_shared<UserResolver>(userModel);
+            auto model = m_userService->AddUser(userModel);
+            auto resolver = std::make_shared<UserResolver>(userModel);
 
-        co_return std::make_shared<graphql::user::object::User>(std::move(resolver));
+            co_return std::make_shared<graphql::user::object::User>(std::move(resolver));
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+            throw std::runtime_error(e.what());
+        }
     }
 
-    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::User>> getUpdateUser(
-        graphql::service::FieldParams&& params,
+    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::User>>
+    getUpdateUser(
+        graphql::service::FieldParams &&params,
         int _Entry,
         std::optional<std::string> _FirstName,
         std::optional<std::string> _MiddleName,
@@ -55,9 +64,9 @@ public:
         std::optional<std::string> _Email,
         std::optional<std::string> _Phone) const
     {
-        UserModel userModel {
+        UserModel userModel{
             .Entry = std::move(_Entry),
-            
+
         };
 
         auto model = m_userService->ModifyUser(userModel);
@@ -67,7 +76,7 @@ public:
     }
 
     graphql::service::AwaitableScalar<std::optional<bool>> getModifyPassword(
-        graphql::service::FieldParams&& params,
+        graphql::service::FieldParams &&params,
         int Entry,
         std::string OldPassword,
         std::string NewPassword) const
