@@ -21,9 +21,172 @@ static_assert(graphql::internal::MinorVersion == 5, "regenerate with schemagen: 
 
 namespace graphql {
 namespace user {
+
+struct [[nodiscard("unnecessary construction")]] CreateUser
+{
+	explicit CreateUser() noexcept;
+	explicit CreateUser(
+		int EntryArg,
+		std::string CodeArg,
+		std::string FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::string LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::string EmailArg,
+		std::string PhoneArg,
+		std::string PasswordArg) noexcept;
+	CreateUser(const CreateUser& other);
+	CreateUser(CreateUser&& other) noexcept;
+	~CreateUser();
+
+	CreateUser& operator=(const CreateUser& other);
+	CreateUser& operator=(CreateUser&& other) noexcept;
+
+	int Entry;
+	std::string Code;
+	std::string FirstName;
+	std::optional<std::string> MiddleName;
+	std::string LastName;
+	std::optional<std::string> SecondLastName;
+	std::string Email;
+	std::string Phone;
+	std::string Password;
+};
+
+struct [[nodiscard("unnecessary construction")]] UserInput
+{
+	explicit UserInput() noexcept;
+	explicit UserInput(
+		int EntryArg,
+		std::string CodeArg,
+		std::optional<std::string> FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::optional<std::string> LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::optional<std::string> EmailArg,
+		std::optional<std::string> PhoneArg) noexcept;
+	UserInput(const UserInput& other);
+	UserInput(UserInput&& other) noexcept;
+	~UserInput();
+
+	UserInput& operator=(const UserInput& other);
+	UserInput& operator=(UserInput&& other) noexcept;
+
+	int Entry;
+	std::string Code;
+	std::optional<std::string> FirstName;
+	std::optional<std::string> MiddleName;
+	std::optional<std::string> LastName;
+	std::optional<std::string> SecondLastName;
+	std::optional<std::string> Email;
+	std::optional<std::string> Phone;
+};
+
+struct [[nodiscard("unnecessary construction")]] UpdateUserInput
+{
+	explicit UpdateUserInput() noexcept;
+	explicit UpdateUserInput(
+		int EntryArg,
+		std::string CodeArg,
+		std::optional<std::string> FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::optional<std::string> LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::optional<std::string> EmailArg,
+		std::optional<std::string> PhoneArg) noexcept;
+	UpdateUserInput(const UpdateUserInput& other);
+	UpdateUserInput(UpdateUserInput&& other) noexcept;
+	~UpdateUserInput();
+
+	UpdateUserInput& operator=(const UpdateUserInput& other);
+	UpdateUserInput& operator=(UpdateUserInput&& other) noexcept;
+
+	int Entry;
+	std::string Code;
+	std::optional<std::string> FirstName;
+	std::optional<std::string> MiddleName;
+	std::optional<std::string> LastName;
+	std::optional<std::string> SecondLastName;
+	std::optional<std::string> Email;
+	std::optional<std::string> Phone;
+};
+
+struct [[nodiscard("unnecessary construction")]] ChangePasswordInput
+{
+	explicit ChangePasswordInput() noexcept;
+	explicit ChangePasswordInput(
+		int EntryArg,
+		std::string CodeArg,
+		std::string OldPasswordArg,
+		std::string NewPasswordArg) noexcept;
+	ChangePasswordInput(const ChangePasswordInput& other);
+	ChangePasswordInput(ChangePasswordInput&& other) noexcept;
+	~ChangePasswordInput();
+
+	ChangePasswordInput& operator=(const ChangePasswordInput& other);
+	ChangePasswordInput& operator=(ChangePasswordInput&& other) noexcept;
+
+	int Entry;
+	std::string Code;
+	std::string OldPassword;
+	std::string NewPassword;
+};
+
+struct [[nodiscard("unnecessary construction")]] CreateUserInput
+{
+	explicit CreateUserInput() noexcept;
+	explicit CreateUserInput(
+		std::string CodeArg,
+		std::string FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::string LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::string EmailArg,
+		std::string PhoneArg,
+		std::string PasswordArg) noexcept;
+	CreateUserInput(const CreateUserInput& other);
+	CreateUserInput(CreateUserInput&& other) noexcept;
+	~CreateUserInput();
+
+	CreateUserInput& operator=(const CreateUserInput& other);
+	CreateUserInput& operator=(CreateUserInput&& other) noexcept;
+
+	std::string Code;
+	std::string FirstName;
+	std::optional<std::string> MiddleName;
+	std::string LastName;
+	std::optional<std::string> SecondLastName;
+	std::string Email;
+	std::string Phone;
+	std::string Password;
+};
+
+struct [[nodiscard("unnecessary construction")]] UserSession
+{
+	explicit UserSession() noexcept;
+	explicit UserSession(
+		std::optional<std::string> CodeArg,
+		std::optional<std::string> EmailArg,
+		std::optional<std::string> PhoneArg,
+		std::string PasswordArg) noexcept;
+	UserSession(const UserSession& other);
+	UserSession(UserSession&& other) noexcept;
+	~UserSession();
+
+	UserSession& operator=(const UserSession& other);
+	UserSession& operator=(UserSession&& other) noexcept;
+
+	std::optional<std::string> Code;
+	std::optional<std::string> Email;
+	std::optional<std::string> Phone;
+	std::string Password;
+};
+
 namespace object {
 
 class User;
+class UserPublic;
+class AuthPayload;
 class UserQuery;
 class UserMutation;
 class Query;
@@ -52,6 +215,8 @@ private:
 };
 
 void AddUserDetails(const std::shared_ptr<schema::ObjectType>& typeUser, const std::shared_ptr<schema::Schema>& schema);
+void AddUserPublicDetails(const std::shared_ptr<schema::ObjectType>& typeUserPublic, const std::shared_ptr<schema::Schema>& schema);
+void AddAuthPayloadDetails(const std::shared_ptr<schema::ObjectType>& typeAuthPayload, const std::shared_ptr<schema::Schema>& schema);
 void AddUserQueryDetails(const std::shared_ptr<schema::ObjectType>& typeUserQuery, const std::shared_ptr<schema::Schema>& schema);
 void AddUserMutationDetails(const std::shared_ptr<schema::ObjectType>& typeUserMutation, const std::shared_ptr<schema::Schema>& schema);
 void AddQueryDetails(const std::shared_ptr<schema::ObjectType>& typeQuery, const std::shared_ptr<schema::Schema>& schema);

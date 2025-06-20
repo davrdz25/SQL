@@ -4,10 +4,15 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include "UserPublicResolver.hpp"
+#include "AuthResolver.hpp"
 #include "../../Generated/User/UserMutationObject.h"
-#include "UserResolver.hpp"
 #include "../../../Services/User/UserService.hpp"
+#include "../../../DTOs/CreateUserDTO.hpp"
+#include "../../../DTOs/ChangePasswordDTO.hpp"
 #include "../../../Models/UserModel.hpp"
+#include "../../../Models/UserPublicModel.hpp"
+#include "../../../Models/AuthPayloadModel.hpp"
 
 class UserMutationResolver
 {
@@ -20,32 +25,47 @@ public:
     {
     }
 
-    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::User>> getCreateUser(
-        graphql::service::FieldParams &&params,
-        std::string _Code,
-        std::string _FirstName,
-        std::optional<std::string> _MiddleName,
-        std::string _LastName,
-        std::string _Email,
-        std::string _Phone,
-        std::string _Password) const
+    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::UserPublic>> getCreateUser(graphql::service::FieldParams &&params, const graphql::user::CreateUserInput &newUser) const
     {
         try
         {
-            UserModel userModel{
-                .Code = std::move(_Code),
-                .FirstName = std::move(_FirstName),
-                .MiddleName = std::move(_MiddleName.value()),
-                .LastName = std::move(_LastName),
-                .Email = std::move(_Email),
-                .Phone = std::move(_Phone),
-                .Password = std::move(_Password),
+            if (newUser.Code == "")
+                throw std::runtime_error("Code cannot be empty");
+
+            if (newUser.FirstName == "")
+                throw std::runtime_error("First name cannot be empty");
+
+            if (newUser.LastName== "")
+                throw std::runtime_error("Last name cannot be empty");
+
+            if (newUser.Email == "")
+                throw std::runtime_error("Email cannot be empty");
+
+            if (newUser.Phone == "")
+                throw std::runtime_error("Phone cannot be empty");
+
+            if (newUser.Password == "")
+                throw std::runtime_error("Password cannot be empty");
+            
+            const CreateUserDTO userParam{
+                newUser.Code,
+                newUser.FirstName,
+                newUser.MiddleName,
+                newUser.LastName,
+                newUser.SecondLastName,
+                newUser.Email,
+                newUser.Phone,
+                newUser.Password
             };
 
-            auto model = m_userService->AddUser(userModel);
-            auto resolver = std::make_shared<UserResolver>(userModel);
+            m_userService->AddUser(userParam);
+            
+            auto userModel = m_userService->GetUserByCode(newUser.Code);
 
-            co_return std::make_shared<graphql::user::object::User>(std::move(resolver));
+            auto resolver = std::make_shared<UserPublicResolver>(userModel);
+
+            co_return std::make_shared<graphql::user::object::UserPublic>(std::move(resolver));
+
         }
         catch (const std::exception &e)
         {
@@ -54,34 +74,73 @@ public:
         }
     }
 
-    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::User>>
-    getUpdateUser(
-        graphql::service::FieldParams &&params,
-        int _Entry,
-        std::optional<std::string> _FirstName,
-        std::optional<std::string> _MiddleName,
-        std::optional<std::string> _LastName,
-        std::optional<std::string> _Email,
-        std::optional<std::string> _Phone) const
+    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::UserPublic>> getUpdateUser(graphql::service::FieldParams &&params, const graphql::user::UpdateUserInput &userChanges) const
     {
-        UserModel userModel{
-            .Entry = std::move(_Entry),
+        try
+        {
+            if (!userChanges.FirstName.has_value() &&
+                !userChanges.MiddleName.has_value() &&
+                !userChanges.LastName.has_value() &&
+                !userChanges.SecondLastName.has_value() &&
+                !userChanges.Email.has_value() &&
+                !userChanges.Phone.has_value()
+            )
+                throw std::runtime_error("No fields to update");
 
-        };
+            auto userModel = m_userService->GetUserByEntry(1);
 
-        auto model = m_userService->ModifyUser(userModel);
+            auto resolver = std::make_shared<UserPublicResolver>(userModel);
 
-        auto resolver = std::make_shared<UserResolver>(userModel);
-        co_return std::make_shared<graphql::user::object::User>(std::move(resolver));
+            co_return std::make_shared<graphql::user::object::UserPublic>(std::move(resolver));
+            
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+            throw std::runtime_error(e.what());
+        }
     }
 
-    graphql::service::AwaitableScalar<std::optional<bool>> getModifyPassword(
-        graphql::service::FieldParams &&params,
-        int Entry,
-        std::string OldPassword,
-        std::string NewPassword) const
+    graphql::service::AwaitableScalar<bool> getModifyPassword(graphql::service::FieldParams &&params, const graphql::user::ChangePasswordInput &user) const
     {
-        auto result = m_userService->ModifyPassword(Entry, OldPassword, NewPassword);
-        co_return result;
+        try
+        {
+            if(user.Code == "")
+                throw std::runtime_error("Code cannot be empty");
+            
+            if(user.OldPassword == user.NewPassword)
+                throw std::runtime_error("New password not to be equal than old password");
+
+            return false;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+            throw std::runtime_error(e.what());
+        }
     }
+
+    graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::AuthPayload>> getLoginUser(graphql::service::FieldParams &&params, const  graphql::user::UserSession &dto) const
+    {
+        try
+        {
+            const UserSessionDTO userSession{
+                dto.Code.value(),
+                dto.Email.value(),
+                dto.Phone.value(),
+                dto.Password
+            };
+
+            auto model = m_userService->CreateUserSession(userSession);
+            auto resolver = std::make_shared<AuthPayloadResolver>(model);
+
+            co_return std::make_shared<graphql::user::object::AuthPayload>(std::move(resolver));
+
+        }
+        catch(const std::exception &e)
+        {
+            std::cerr << e.what() << std::endl;
+            throw std::runtime_error(e.what());
+        }
+    };
 };

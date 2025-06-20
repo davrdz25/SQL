@@ -22,7 +22,609 @@
 using namespace std::literals;
 
 namespace graphql {
+namespace service {
+
+template <>
+user::CreateUser Argument<user::CreateUser>::convert(const response::Value& value)
+{
+	auto valueEntry = service::ModifiedArgument<int>::require("Entry", value);
+	auto valueCode = service::ModifiedArgument<std::string>::require("Code", value);
+	auto valueFirstName = service::ModifiedArgument<std::string>::require("FirstName", value);
+	auto valueMiddleName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("MiddleName", value);
+	auto valueLastName = service::ModifiedArgument<std::string>::require("LastName", value);
+	auto valueSecondLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("SecondLastName", value);
+	auto valueEmail = service::ModifiedArgument<std::string>::require("Email", value);
+	auto valuePhone = service::ModifiedArgument<std::string>::require("Phone", value);
+	auto valuePassword = service::ModifiedArgument<std::string>::require("Password", value);
+
+	return user::CreateUser {
+		valueEntry,
+		std::move(valueCode),
+		std::move(valueFirstName),
+		std::move(valueMiddleName),
+		std::move(valueLastName),
+		std::move(valueSecondLastName),
+		std::move(valueEmail),
+		std::move(valuePhone),
+		std::move(valuePassword)
+	};
+}
+
+template <>
+user::UserInput Argument<user::UserInput>::convert(const response::Value& value)
+{
+	auto valueEntry = service::ModifiedArgument<int>::require("Entry", value);
+	auto valueCode = service::ModifiedArgument<std::string>::require("Code", value);
+	auto valueFirstName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("FirstName", value);
+	auto valueMiddleName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("MiddleName", value);
+	auto valueLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("LastName", value);
+	auto valueSecondLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("SecondLastName", value);
+	auto valueEmail = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Email", value);
+	auto valuePhone = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Phone", value);
+
+	return user::UserInput {
+		valueEntry,
+		std::move(valueCode),
+		std::move(valueFirstName),
+		std::move(valueMiddleName),
+		std::move(valueLastName),
+		std::move(valueSecondLastName),
+		std::move(valueEmail),
+		std::move(valuePhone)
+	};
+}
+
+template <>
+user::UpdateUserInput Argument<user::UpdateUserInput>::convert(const response::Value& value)
+{
+	auto valueEntry = service::ModifiedArgument<int>::require("Entry", value);
+	auto valueCode = service::ModifiedArgument<std::string>::require("Code", value);
+	auto valueFirstName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("FirstName", value);
+	auto valueMiddleName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("MiddleName", value);
+	auto valueLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("LastName", value);
+	auto valueSecondLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("SecondLastName", value);
+	auto valueEmail = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Email", value);
+	auto valuePhone = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Phone", value);
+
+	return user::UpdateUserInput {
+		valueEntry,
+		std::move(valueCode),
+		std::move(valueFirstName),
+		std::move(valueMiddleName),
+		std::move(valueLastName),
+		std::move(valueSecondLastName),
+		std::move(valueEmail),
+		std::move(valuePhone)
+	};
+}
+
+template <>
+user::ChangePasswordInput Argument<user::ChangePasswordInput>::convert(const response::Value& value)
+{
+	auto valueEntry = service::ModifiedArgument<int>::require("Entry", value);
+	auto valueCode = service::ModifiedArgument<std::string>::require("Code", value);
+	auto valueOldPassword = service::ModifiedArgument<std::string>::require("OldPassword", value);
+	auto valueNewPassword = service::ModifiedArgument<std::string>::require("NewPassword", value);
+
+	return user::ChangePasswordInput {
+		valueEntry,
+		std::move(valueCode),
+		std::move(valueOldPassword),
+		std::move(valueNewPassword)
+	};
+}
+
+template <>
+user::CreateUserInput Argument<user::CreateUserInput>::convert(const response::Value& value)
+{
+	auto valueCode = service::ModifiedArgument<std::string>::require("Code", value);
+	auto valueFirstName = service::ModifiedArgument<std::string>::require("FirstName", value);
+	auto valueMiddleName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("MiddleName", value);
+	auto valueLastName = service::ModifiedArgument<std::string>::require("LastName", value);
+	auto valueSecondLastName = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("SecondLastName", value);
+	auto valueEmail = service::ModifiedArgument<std::string>::require("Email", value);
+	auto valuePhone = service::ModifiedArgument<std::string>::require("Phone", value);
+	auto valuePassword = service::ModifiedArgument<std::string>::require("Password", value);
+
+	return user::CreateUserInput {
+		std::move(valueCode),
+		std::move(valueFirstName),
+		std::move(valueMiddleName),
+		std::move(valueLastName),
+		std::move(valueSecondLastName),
+		std::move(valueEmail),
+		std::move(valuePhone),
+		std::move(valuePassword)
+	};
+}
+
+template <>
+user::UserSession Argument<user::UserSession>::convert(const response::Value& value)
+{
+	auto valueCode = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Code", value);
+	auto valueEmail = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Email", value);
+	auto valuePhone = service::ModifiedArgument<std::string>::require<service::TypeModifier::Nullable>("Phone", value);
+	auto valuePassword = service::ModifiedArgument<std::string>::require("Password", value);
+
+	return user::UserSession {
+		std::move(valueCode),
+		std::move(valueEmail),
+		std::move(valuePhone),
+		std::move(valuePassword)
+	};
+}
+
+} // namespace service
+
 namespace user {
+
+CreateUser::CreateUser() noexcept
+	: Entry {}
+	, Code {}
+	, FirstName {}
+	, MiddleName {}
+	, LastName {}
+	, SecondLastName {}
+	, Email {}
+	, Phone {}
+	, Password {}
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+CreateUser::CreateUser(
+		int EntryArg,
+		std::string CodeArg,
+		std::string FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::string LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::string EmailArg,
+		std::string PhoneArg,
+		std::string PasswordArg) noexcept
+	: Entry { std::move(EntryArg) }
+	, Code { std::move(CodeArg) }
+	, FirstName { std::move(FirstNameArg) }
+	, MiddleName { std::move(MiddleNameArg) }
+	, LastName { std::move(LastNameArg) }
+	, SecondLastName { std::move(SecondLastNameArg) }
+	, Email { std::move(EmailArg) }
+	, Phone { std::move(PhoneArg) }
+	, Password { std::move(PasswordArg) }
+{
+}
+
+CreateUser::CreateUser(const CreateUser& other)
+	: Entry { service::ModifiedArgument<int>::duplicate(other.Entry) }
+	, Code { service::ModifiedArgument<std::string>::duplicate(other.Code) }
+	, FirstName { service::ModifiedArgument<std::string>::duplicate(other.FirstName) }
+	, MiddleName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.MiddleName) }
+	, LastName { service::ModifiedArgument<std::string>::duplicate(other.LastName) }
+	, SecondLastName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.SecondLastName) }
+	, Email { service::ModifiedArgument<std::string>::duplicate(other.Email) }
+	, Phone { service::ModifiedArgument<std::string>::duplicate(other.Phone) }
+	, Password { service::ModifiedArgument<std::string>::duplicate(other.Password) }
+{
+}
+
+CreateUser::CreateUser(CreateUser&& other) noexcept
+	: Entry { std::move(other.Entry) }
+	, Code { std::move(other.Code) }
+	, FirstName { std::move(other.FirstName) }
+	, MiddleName { std::move(other.MiddleName) }
+	, LastName { std::move(other.LastName) }
+	, SecondLastName { std::move(other.SecondLastName) }
+	, Email { std::move(other.Email) }
+	, Phone { std::move(other.Phone) }
+	, Password { std::move(other.Password) }
+{
+}
+
+CreateUser::~CreateUser()
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+CreateUser& CreateUser::operator=(const CreateUser& other)
+{
+	CreateUser value { other };
+
+	std::swap(*this, value);
+
+	return *this;
+}
+
+CreateUser& CreateUser::operator=(CreateUser&& other) noexcept
+{
+	Entry = std::move(other.Entry);
+	Code = std::move(other.Code);
+	FirstName = std::move(other.FirstName);
+	MiddleName = std::move(other.MiddleName);
+	LastName = std::move(other.LastName);
+	SecondLastName = std::move(other.SecondLastName);
+	Email = std::move(other.Email);
+	Phone = std::move(other.Phone);
+	Password = std::move(other.Password);
+
+	return *this;
+}
+
+UserInput::UserInput() noexcept
+	: Entry {}
+	, Code {}
+	, FirstName {}
+	, MiddleName {}
+	, LastName {}
+	, SecondLastName {}
+	, Email {}
+	, Phone {}
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+UserInput::UserInput(
+		int EntryArg,
+		std::string CodeArg,
+		std::optional<std::string> FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::optional<std::string> LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::optional<std::string> EmailArg,
+		std::optional<std::string> PhoneArg) noexcept
+	: Entry { std::move(EntryArg) }
+	, Code { std::move(CodeArg) }
+	, FirstName { std::move(FirstNameArg) }
+	, MiddleName { std::move(MiddleNameArg) }
+	, LastName { std::move(LastNameArg) }
+	, SecondLastName { std::move(SecondLastNameArg) }
+	, Email { std::move(EmailArg) }
+	, Phone { std::move(PhoneArg) }
+{
+}
+
+UserInput::UserInput(const UserInput& other)
+	: Entry { service::ModifiedArgument<int>::duplicate(other.Entry) }
+	, Code { service::ModifiedArgument<std::string>::duplicate(other.Code) }
+	, FirstName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.FirstName) }
+	, MiddleName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.MiddleName) }
+	, LastName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.LastName) }
+	, SecondLastName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.SecondLastName) }
+	, Email { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Email) }
+	, Phone { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Phone) }
+{
+}
+
+UserInput::UserInput(UserInput&& other) noexcept
+	: Entry { std::move(other.Entry) }
+	, Code { std::move(other.Code) }
+	, FirstName { std::move(other.FirstName) }
+	, MiddleName { std::move(other.MiddleName) }
+	, LastName { std::move(other.LastName) }
+	, SecondLastName { std::move(other.SecondLastName) }
+	, Email { std::move(other.Email) }
+	, Phone { std::move(other.Phone) }
+{
+}
+
+UserInput::~UserInput()
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+UserInput& UserInput::operator=(const UserInput& other)
+{
+	UserInput value { other };
+
+	std::swap(*this, value);
+
+	return *this;
+}
+
+UserInput& UserInput::operator=(UserInput&& other) noexcept
+{
+	Entry = std::move(other.Entry);
+	Code = std::move(other.Code);
+	FirstName = std::move(other.FirstName);
+	MiddleName = std::move(other.MiddleName);
+	LastName = std::move(other.LastName);
+	SecondLastName = std::move(other.SecondLastName);
+	Email = std::move(other.Email);
+	Phone = std::move(other.Phone);
+
+	return *this;
+}
+
+UpdateUserInput::UpdateUserInput() noexcept
+	: Entry {}
+	, Code {}
+	, FirstName {}
+	, MiddleName {}
+	, LastName {}
+	, SecondLastName {}
+	, Email {}
+	, Phone {}
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+UpdateUserInput::UpdateUserInput(
+		int EntryArg,
+		std::string CodeArg,
+		std::optional<std::string> FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::optional<std::string> LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::optional<std::string> EmailArg,
+		std::optional<std::string> PhoneArg) noexcept
+	: Entry { std::move(EntryArg) }
+	, Code { std::move(CodeArg) }
+	, FirstName { std::move(FirstNameArg) }
+	, MiddleName { std::move(MiddleNameArg) }
+	, LastName { std::move(LastNameArg) }
+	, SecondLastName { std::move(SecondLastNameArg) }
+	, Email { std::move(EmailArg) }
+	, Phone { std::move(PhoneArg) }
+{
+}
+
+UpdateUserInput::UpdateUserInput(const UpdateUserInput& other)
+	: Entry { service::ModifiedArgument<int>::duplicate(other.Entry) }
+	, Code { service::ModifiedArgument<std::string>::duplicate(other.Code) }
+	, FirstName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.FirstName) }
+	, MiddleName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.MiddleName) }
+	, LastName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.LastName) }
+	, SecondLastName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.SecondLastName) }
+	, Email { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Email) }
+	, Phone { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Phone) }
+{
+}
+
+UpdateUserInput::UpdateUserInput(UpdateUserInput&& other) noexcept
+	: Entry { std::move(other.Entry) }
+	, Code { std::move(other.Code) }
+	, FirstName { std::move(other.FirstName) }
+	, MiddleName { std::move(other.MiddleName) }
+	, LastName { std::move(other.LastName) }
+	, SecondLastName { std::move(other.SecondLastName) }
+	, Email { std::move(other.Email) }
+	, Phone { std::move(other.Phone) }
+{
+}
+
+UpdateUserInput::~UpdateUserInput()
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+UpdateUserInput& UpdateUserInput::operator=(const UpdateUserInput& other)
+{
+	UpdateUserInput value { other };
+
+	std::swap(*this, value);
+
+	return *this;
+}
+
+UpdateUserInput& UpdateUserInput::operator=(UpdateUserInput&& other) noexcept
+{
+	Entry = std::move(other.Entry);
+	Code = std::move(other.Code);
+	FirstName = std::move(other.FirstName);
+	MiddleName = std::move(other.MiddleName);
+	LastName = std::move(other.LastName);
+	SecondLastName = std::move(other.SecondLastName);
+	Email = std::move(other.Email);
+	Phone = std::move(other.Phone);
+
+	return *this;
+}
+
+ChangePasswordInput::ChangePasswordInput() noexcept
+	: Entry {}
+	, Code {}
+	, OldPassword {}
+	, NewPassword {}
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+ChangePasswordInput::ChangePasswordInput(
+		int EntryArg,
+		std::string CodeArg,
+		std::string OldPasswordArg,
+		std::string NewPasswordArg) noexcept
+	: Entry { std::move(EntryArg) }
+	, Code { std::move(CodeArg) }
+	, OldPassword { std::move(OldPasswordArg) }
+	, NewPassword { std::move(NewPasswordArg) }
+{
+}
+
+ChangePasswordInput::ChangePasswordInput(const ChangePasswordInput& other)
+	: Entry { service::ModifiedArgument<int>::duplicate(other.Entry) }
+	, Code { service::ModifiedArgument<std::string>::duplicate(other.Code) }
+	, OldPassword { service::ModifiedArgument<std::string>::duplicate(other.OldPassword) }
+	, NewPassword { service::ModifiedArgument<std::string>::duplicate(other.NewPassword) }
+{
+}
+
+ChangePasswordInput::ChangePasswordInput(ChangePasswordInput&& other) noexcept
+	: Entry { std::move(other.Entry) }
+	, Code { std::move(other.Code) }
+	, OldPassword { std::move(other.OldPassword) }
+	, NewPassword { std::move(other.NewPassword) }
+{
+}
+
+ChangePasswordInput::~ChangePasswordInput()
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+ChangePasswordInput& ChangePasswordInput::operator=(const ChangePasswordInput& other)
+{
+	ChangePasswordInput value { other };
+
+	std::swap(*this, value);
+
+	return *this;
+}
+
+ChangePasswordInput& ChangePasswordInput::operator=(ChangePasswordInput&& other) noexcept
+{
+	Entry = std::move(other.Entry);
+	Code = std::move(other.Code);
+	OldPassword = std::move(other.OldPassword);
+	NewPassword = std::move(other.NewPassword);
+
+	return *this;
+}
+
+CreateUserInput::CreateUserInput() noexcept
+	: Code {}
+	, FirstName {}
+	, MiddleName {}
+	, LastName {}
+	, SecondLastName {}
+	, Email {}
+	, Phone {}
+	, Password {}
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+CreateUserInput::CreateUserInput(
+		std::string CodeArg,
+		std::string FirstNameArg,
+		std::optional<std::string> MiddleNameArg,
+		std::string LastNameArg,
+		std::optional<std::string> SecondLastNameArg,
+		std::string EmailArg,
+		std::string PhoneArg,
+		std::string PasswordArg) noexcept
+	: Code { std::move(CodeArg) }
+	, FirstName { std::move(FirstNameArg) }
+	, MiddleName { std::move(MiddleNameArg) }
+	, LastName { std::move(LastNameArg) }
+	, SecondLastName { std::move(SecondLastNameArg) }
+	, Email { std::move(EmailArg) }
+	, Phone { std::move(PhoneArg) }
+	, Password { std::move(PasswordArg) }
+{
+}
+
+CreateUserInput::CreateUserInput(const CreateUserInput& other)
+	: Code { service::ModifiedArgument<std::string>::duplicate(other.Code) }
+	, FirstName { service::ModifiedArgument<std::string>::duplicate(other.FirstName) }
+	, MiddleName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.MiddleName) }
+	, LastName { service::ModifiedArgument<std::string>::duplicate(other.LastName) }
+	, SecondLastName { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.SecondLastName) }
+	, Email { service::ModifiedArgument<std::string>::duplicate(other.Email) }
+	, Phone { service::ModifiedArgument<std::string>::duplicate(other.Phone) }
+	, Password { service::ModifiedArgument<std::string>::duplicate(other.Password) }
+{
+}
+
+CreateUserInput::CreateUserInput(CreateUserInput&& other) noexcept
+	: Code { std::move(other.Code) }
+	, FirstName { std::move(other.FirstName) }
+	, MiddleName { std::move(other.MiddleName) }
+	, LastName { std::move(other.LastName) }
+	, SecondLastName { std::move(other.SecondLastName) }
+	, Email { std::move(other.Email) }
+	, Phone { std::move(other.Phone) }
+	, Password { std::move(other.Password) }
+{
+}
+
+CreateUserInput::~CreateUserInput()
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+CreateUserInput& CreateUserInput::operator=(const CreateUserInput& other)
+{
+	CreateUserInput value { other };
+
+	std::swap(*this, value);
+
+	return *this;
+}
+
+CreateUserInput& CreateUserInput::operator=(CreateUserInput&& other) noexcept
+{
+	Code = std::move(other.Code);
+	FirstName = std::move(other.FirstName);
+	MiddleName = std::move(other.MiddleName);
+	LastName = std::move(other.LastName);
+	SecondLastName = std::move(other.SecondLastName);
+	Email = std::move(other.Email);
+	Phone = std::move(other.Phone);
+	Password = std::move(other.Password);
+
+	return *this;
+}
+
+UserSession::UserSession() noexcept
+	: Code {}
+	, Email {}
+	, Phone {}
+	, Password {}
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+UserSession::UserSession(
+		std::optional<std::string> CodeArg,
+		std::optional<std::string> EmailArg,
+		std::optional<std::string> PhoneArg,
+		std::string PasswordArg) noexcept
+	: Code { std::move(CodeArg) }
+	, Email { std::move(EmailArg) }
+	, Phone { std::move(PhoneArg) }
+	, Password { std::move(PasswordArg) }
+{
+}
+
+UserSession::UserSession(const UserSession& other)
+	: Code { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Code) }
+	, Email { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Email) }
+	, Phone { service::ModifiedArgument<std::string>::duplicate<service::TypeModifier::Nullable>(other.Phone) }
+	, Password { service::ModifiedArgument<std::string>::duplicate(other.Password) }
+{
+}
+
+UserSession::UserSession(UserSession&& other) noexcept
+	: Code { std::move(other.Code) }
+	, Email { std::move(other.Email) }
+	, Phone { std::move(other.Phone) }
+	, Password { std::move(other.Password) }
+{
+}
+
+UserSession::~UserSession()
+{
+	// Explicit definition to prevent ODR violations when LTO is enabled.
+}
+
+UserSession& UserSession::operator=(const UserSession& other)
+{
+	UserSession value { other };
+
+	std::swap(*this, value);
+
+	return *this;
+}
+
+UserSession& UserSession::operator=(UserSession&& other) noexcept
+{
+	Code = std::move(other.Code);
+	Email = std::move(other.Email);
+	Phone = std::move(other.Phone);
+	Password = std::move(other.Password);
+
+	return *this;
+}
 
 Operations::Operations(std::shared_ptr<object::Query> query, std::shared_ptr<object::Mutation> mutation)
 	: service::Request({
@@ -36,8 +638,24 @@ Operations::Operations(std::shared_ptr<object::Query> query, std::shared_ptr<obj
 
 void AddTypesToSchema(const std::shared_ptr<schema::Schema>& schema)
 {
+	auto typeCreateUser = schema::InputObjectType::Make(R"gql(CreateUser)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(CreateUser)gql"sv, typeCreateUser);
+	auto typeUserInput = schema::InputObjectType::Make(R"gql(UserInput)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(UserInput)gql"sv, typeUserInput);
+	auto typeUpdateUserInput = schema::InputObjectType::Make(R"gql(UpdateUserInput)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(UpdateUserInput)gql"sv, typeUpdateUserInput);
+	auto typeChangePasswordInput = schema::InputObjectType::Make(R"gql(ChangePasswordInput)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(ChangePasswordInput)gql"sv, typeChangePasswordInput);
+	auto typeCreateUserInput = schema::InputObjectType::Make(R"gql(CreateUserInput)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(CreateUserInput)gql"sv, typeCreateUserInput);
+	auto typeUserSession = schema::InputObjectType::Make(R"gql(UserSession)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(UserSession)gql"sv, typeUserSession);
 	auto typeUser = schema::ObjectType::Make(R"gql(User)gql"sv, R"md()md"sv);
 	schema->AddType(R"gql(User)gql"sv, typeUser);
+	auto typeUserPublic = schema::ObjectType::Make(R"gql(UserPublic)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(UserPublic)gql"sv, typeUserPublic);
+	auto typeAuthPayload = schema::ObjectType::Make(R"gql(AuthPayload)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(AuthPayload)gql"sv, typeAuthPayload);
 	auto typeUserQuery = schema::ObjectType::Make(R"gql(UserQuery)gql"sv, R"md()md"sv);
 	schema->AddType(R"gql(UserQuery)gql"sv, typeUserQuery);
 	auto typeUserMutation = schema::ObjectType::Make(R"gql(UserMutation)gql"sv, R"md()md"sv);
@@ -47,7 +665,63 @@ void AddTypesToSchema(const std::shared_ptr<schema::Schema>& schema)
 	auto typeMutation = schema::ObjectType::Make(R"gql(Mutation)gql"sv, R"md()md"sv);
 	schema->AddType(R"gql(Mutation)gql"sv, typeMutation);
 
+	typeCreateUser->AddInputValues({
+		schema::InputValue::Make(R"gql(Entry)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(Int)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Code)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(FirstName)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(MiddleName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(LastName)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(SecondLastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Email)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Phone)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Password)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv)
+	});
+	typeUserInput->AddInputValues({
+		schema::InputValue::Make(R"gql(Entry)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(Int)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Code)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(FirstName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(MiddleName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(LastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(SecondLastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Email)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Phone)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv)
+	});
+	typeUpdateUserInput->AddInputValues({
+		schema::InputValue::Make(R"gql(Entry)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(Int)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Code)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(FirstName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(MiddleName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(LastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(SecondLastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Email)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Phone)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv)
+	});
+	typeChangePasswordInput->AddInputValues({
+		schema::InputValue::Make(R"gql(Entry)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(Int)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Code)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(OldPassword)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(NewPassword)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv)
+	});
+	typeCreateUserInput->AddInputValues({
+		schema::InputValue::Make(R"gql(Code)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(FirstName)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(MiddleName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(LastName)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(SecondLastName)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Email)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Phone)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Password)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv)
+	});
+	typeUserSession->AddInputValues({
+		schema::InputValue::Make(R"gql(Code)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Email)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Phone)gql"sv, R"md()md"sv, schema->LookupType(R"gql(String)gql"sv), R"gql()gql"sv),
+		schema::InputValue::Make(R"gql(Password)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv)
+	});
+
 	AddUserDetails(typeUser, schema);
+	AddUserPublicDetails(typeUserPublic, schema);
+	AddAuthPayloadDetails(typeAuthPayload, schema);
 	AddUserQueryDetails(typeUserQuery, schema);
 	AddUserMutationDetails(typeUserMutation, schema);
 	AddQueryDetails(typeQuery, schema);

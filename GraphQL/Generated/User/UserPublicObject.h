@@ -5,13 +5,13 @@
 
 #pragma once
 
-#ifndef USEROBJECT_H
-#define USEROBJECT_H
+#ifndef USERPUBLICOBJECT_H
+#define USERPUBLICOBJECT_H
 
 #include "UserSchema.h"
 
 namespace graphql::user::object {
-namespace methods::UserHas {
+namespace methods::UserPublicHas {
 
 template <class TImpl>
 concept getEntryWithParams = requires (TImpl impl, service::FieldParams params)
@@ -110,18 +110,6 @@ concept getPhone = requires (TImpl impl)
 };
 
 template <class TImpl>
-concept getPasswordWithParams = requires (TImpl impl, service::FieldParams params)
-{
-	{ service::AwaitableScalar<std::string> { impl.getPassword(std::move(params)) } };
-};
-
-template <class TImpl>
-concept getPassword = requires (TImpl impl)
-{
-	{ service::AwaitableScalar<std::string> { impl.getPassword() } };
-};
-
-template <class TImpl>
 concept beginSelectionSet = requires (TImpl impl, const service::SelectionSetParams params)
 {
 	{ impl.beginSelectionSet(params) };
@@ -133,9 +121,9 @@ concept endSelectionSet = requires (TImpl impl, const service::SelectionSetParam
 	{ impl.endSelectionSet(params) };
 };
 
-} // namespace methods::UserHas
+} // namespace methods::UserPublicHas
 
-class [[nodiscard("unnecessary construction")]] User final
+class [[nodiscard("unnecessary construction")]] UserPublic final
 	: public service::Object
 {
 private:
@@ -147,7 +135,6 @@ private:
 	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolveSecondLastName(service::ResolverParams&& params) const;
 	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolveEmail(service::ResolverParams&& params) const;
 	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolvePhone(service::ResolverParams&& params) const;
-	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolvePassword(service::ResolverParams&& params) const;
 
 	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolve_typename(service::ResolverParams&& params) const;
 
@@ -166,7 +153,6 @@ private:
 		[[nodiscard("unnecessary call")]] virtual service::AwaitableScalar<std::optional<std::string>> getSecondLastName(service::FieldParams&& params) const = 0;
 		[[nodiscard("unnecessary call")]] virtual service::AwaitableScalar<std::string> getEmail(service::FieldParams&& params) const = 0;
 		[[nodiscard("unnecessary call")]] virtual service::AwaitableScalar<std::string> getPhone(service::FieldParams&& params) const = 0;
-		[[nodiscard("unnecessary call")]] virtual service::AwaitableScalar<std::string> getPassword(service::FieldParams&& params) const = 0;
 	};
 
 	template <class T>
@@ -180,124 +166,111 @@ private:
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<int> getEntry(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getEntryWithParams<T>)
+			if constexpr (methods::UserPublicHas::getEntryWithParams<T>)
 			{
 				return { _pimpl->getEntry(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getEntry<T>, R"msg(User::getEntry is not implemented)msg");
+				static_assert(methods::UserPublicHas::getEntry<T>, R"msg(UserPublic::getEntry is not implemented)msg");
 				return { _pimpl->getEntry() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getCode(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getCodeWithParams<T>)
+			if constexpr (methods::UserPublicHas::getCodeWithParams<T>)
 			{
 				return { _pimpl->getCode(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getCode<T>, R"msg(User::getCode is not implemented)msg");
+				static_assert(methods::UserPublicHas::getCode<T>, R"msg(UserPublic::getCode is not implemented)msg");
 				return { _pimpl->getCode() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getFirstName(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getFirstNameWithParams<T>)
+			if constexpr (methods::UserPublicHas::getFirstNameWithParams<T>)
 			{
 				return { _pimpl->getFirstName(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getFirstName<T>, R"msg(User::getFirstName is not implemented)msg");
+				static_assert(methods::UserPublicHas::getFirstName<T>, R"msg(UserPublic::getFirstName is not implemented)msg");
 				return { _pimpl->getFirstName() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::optional<std::string>> getMiddleName(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getMiddleNameWithParams<T>)
+			if constexpr (methods::UserPublicHas::getMiddleNameWithParams<T>)
 			{
 				return { _pimpl->getMiddleName(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getMiddleName<T>, R"msg(User::getMiddleName is not implemented)msg");
+				static_assert(methods::UserPublicHas::getMiddleName<T>, R"msg(UserPublic::getMiddleName is not implemented)msg");
 				return { _pimpl->getMiddleName() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getLastName(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getLastNameWithParams<T>)
+			if constexpr (methods::UserPublicHas::getLastNameWithParams<T>)
 			{
 				return { _pimpl->getLastName(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getLastName<T>, R"msg(User::getLastName is not implemented)msg");
+				static_assert(methods::UserPublicHas::getLastName<T>, R"msg(UserPublic::getLastName is not implemented)msg");
 				return { _pimpl->getLastName() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::optional<std::string>> getSecondLastName(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getSecondLastNameWithParams<T>)
+			if constexpr (methods::UserPublicHas::getSecondLastNameWithParams<T>)
 			{
 				return { _pimpl->getSecondLastName(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getSecondLastName<T>, R"msg(User::getSecondLastName is not implemented)msg");
+				static_assert(methods::UserPublicHas::getSecondLastName<T>, R"msg(UserPublic::getSecondLastName is not implemented)msg");
 				return { _pimpl->getSecondLastName() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getEmail(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getEmailWithParams<T>)
+			if constexpr (methods::UserPublicHas::getEmailWithParams<T>)
 			{
 				return { _pimpl->getEmail(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getEmail<T>, R"msg(User::getEmail is not implemented)msg");
+				static_assert(methods::UserPublicHas::getEmail<T>, R"msg(UserPublic::getEmail is not implemented)msg");
 				return { _pimpl->getEmail() };
 			}
 		}
 
 		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getPhone(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::UserHas::getPhoneWithParams<T>)
+			if constexpr (methods::UserPublicHas::getPhoneWithParams<T>)
 			{
 				return { _pimpl->getPhone(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::UserHas::getPhone<T>, R"msg(User::getPhone is not implemented)msg");
+				static_assert(methods::UserPublicHas::getPhone<T>, R"msg(UserPublic::getPhone is not implemented)msg");
 				return { _pimpl->getPhone() };
-			}
-		}
-
-		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getPassword(service::FieldParams&& params) const override
-		{
-			if constexpr (methods::UserHas::getPasswordWithParams<T>)
-			{
-				return { _pimpl->getPassword(std::move(params)) };
-			}
-			else
-			{
-				static_assert(methods::UserHas::getPassword<T>, R"msg(User::getPassword is not implemented)msg");
-				return { _pimpl->getPassword() };
 			}
 		}
 
 		void beginSelectionSet(const service::SelectionSetParams& params) const override
 		{
-			if constexpr (methods::UserHas::beginSelectionSet<T>)
+			if constexpr (methods::UserPublicHas::beginSelectionSet<T>)
 			{
 				_pimpl->beginSelectionSet(params);
 			}
@@ -305,7 +278,7 @@ private:
 
 		void endSelectionSet(const service::SelectionSetParams& params) const override
 		{
-			if constexpr (methods::UserHas::endSelectionSet<T>)
+			if constexpr (methods::UserPublicHas::endSelectionSet<T>)
 			{
 				_pimpl->endSelectionSet(params);
 			}
@@ -315,7 +288,7 @@ private:
 		const std::shared_ptr<T> _pimpl;
 	};
 
-	explicit User(std::unique_ptr<const Concept> pimpl) noexcept;
+	explicit UserPublic(std::unique_ptr<const Concept> pimpl) noexcept;
 
 	[[nodiscard("unnecessary call")]] service::TypeNames getTypeNames() const noexcept;
 	[[nodiscard("unnecessary call")]] service::ResolverMap getResolvers() const noexcept;
@@ -327,17 +300,17 @@ private:
 
 public:
 	template <class T>
-	explicit User(std::shared_ptr<T> pimpl) noexcept
-		: User { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
+	explicit UserPublic(std::shared_ptr<T> pimpl) noexcept
+		: UserPublic { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
 	{
 	}
 
 	[[nodiscard("unnecessary call")]] static constexpr std::string_view getObjectType() noexcept
 	{
-		return { R"gql(User)gql" };
+		return { R"gql(UserPublic)gql" };
 	}
 };
 
 } // namespace graphql::user::object
 
-#endif // USEROBJECT_H
+#endif // USERPUBLICOBJECT_H

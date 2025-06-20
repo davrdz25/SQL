@@ -105,6 +105,7 @@ http::response<http::string_body> handleGraphQLRequest(const std::string &body, 
         boost::json::object obj = jv.as_object();
 
         std::string operationName;
+        
         if (obj.contains("operationName") && !obj["operationName"].is_null())
         {
             operationName = obj["operationName"].as_string().c_str();
@@ -278,8 +279,6 @@ void start_http_server(net::io_context& ioc, unsigned short port, std::shared_pt
     (*do_accept)();
 }
 
-
-
 void start_websocket_server(net::io_context& ioc, unsigned short port)
 {
     auto acceptor = std::make_shared<tcp::acceptor>(ioc, tcp::endpoint{tcp::v4(), port});
@@ -310,8 +309,6 @@ void start_websocket_server(net::io_context& ioc, unsigned short port)
     (*do_accept)();
 }
 
-
-
 int main()
 {
     Base64::SetSecret("_.:Development:._");
@@ -319,6 +316,7 @@ int main()
     net::io_context ioc;
 
     auto database = std::make_shared<SQL>();
+    
     database->ServerName("192.168.1.253");
     database->UserName("sa");
     database->Password("Development..");
@@ -350,3 +348,4 @@ int main()
 
     return 0;
 }
+ 

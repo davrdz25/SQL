@@ -1,14 +1,38 @@
 #pragma once
-#include <iostream>
-#include <map>
-#include <vector>
 
-class DataTable {
-    private:
-        std::vector<std::map<std::string, std::string>> data;
-    
+#include <string>
+#include <iostream>
+#include <unordered_map>
+#include <optional>
+#include <vector>
+#include <stdexcept>
+
+class DataTable
+{
+public:
+    using Value = std::optional<std::string>;
+
+    class Row
+    {
     public:
-        void Fill(const std::vector<std::map<std::string, std::string>>& newData);
-        std::map<std::string, std::string>& operator[](int index);
-        int RowsCount() const ;
+        Value &operator[](const std::string &column);
+        const Value &operator[](const std::string &column) const;
+
+        void Set(const std::string &column, const Value &value);
+        void SetColumns(const std::vector<std::string> &columns);
+
+    private:
+        std::unordered_map<std::string, Value> values;
+        std::vector<std::string> expectedColumns;
     };
+
+    void SetColumns(const std::vector<std::string> &columns);
+    void Fill(const std::vector<Row> &newData);
+    Row &operator[](int index);
+    const Row &operator[](int index) const;
+    int RowsCount() const;
+
+private:
+    std::vector<std::string> columns;
+    std::vector<Row> data;
+};

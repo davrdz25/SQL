@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include "../Interfaces/ISQL.hpp"
+#include "DataTable.hpp"
 
 class SQL : public ISQL{
     private:
@@ -21,7 +22,7 @@ class SQL : public ISQL{
         bool _TrustServerCertificate;
 
         void PrepareStatement(const std::string&);
-        void ExtractError(const char *, SQLHANDLE, SQLSMALLINT);
+        std::string ExtractError(const char *, SQLHANDLE, SQLSMALLINT);
         void RunQuery(const std::string&);
 
     public:
@@ -34,11 +35,17 @@ class SQL : public ISQL{
         void TrustServerCertificate(const bool&);
         bool Connect() override;
         bool RunStatement(const std::string&) override;
-        std::vector<std::map<std::string, std::string>> FetchResults(const std::string&) override;
 
         bool RunPrepared(const std::string&, const std::vector<std::string>&) override;
-        bool RunPrepared(const std::string &,const std::vector<std::string> &, const std::vector<std::vector<uint8_t>> &) override;
-        std::vector<std::map<std::string, std::string>> FetchPrepared(const std::string&, const std::vector<std::string>&) override;
-        std::vector<std::map<std::string, std::string>> FetchPrepared(const std::string&, const std::string&) override;
+        bool RunPrepared(const std::string &,const std::vector<std::optional<std::string>> &, const std::vector<std::vector<uint8_t>> &) override;
+        DataTable FetchPrepared(const std::string&, const std::vector<std::string>&) override;
+        DataTable FetchPrepared(const std::string &, const std::string &) override;
+        DataTable FetchResults(const std::string&) override;
+
+        bool BeginTransaction();
+        bool CommitTransaction();
+        bool RollbackTransaction();
+
+        void Disconnect();
     };
     

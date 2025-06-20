@@ -5,24 +5,36 @@
 
 #pragma once
 
-#ifndef QUERYOBJECT_H
-#define QUERYOBJECT_H
+#ifndef AUTHPAYLOADOBJECT_H
+#define AUTHPAYLOADOBJECT_H
 
 #include "UserSchema.h"
 
 namespace graphql::user::object {
-namespace methods::QueryHas {
+namespace methods::AuthPayloadHas {
+
+template <class TImpl>
+concept getTokenWithParams = requires (TImpl impl, service::FieldParams params)
+{
+	{ service::AwaitableScalar<std::string> { impl.getToken(std::move(params)) } };
+};
+
+template <class TImpl>
+concept getToken = requires (TImpl impl)
+{
+	{ service::AwaitableScalar<std::string> { impl.getToken() } };
+};
 
 template <class TImpl>
 concept getUserWithParams = requires (TImpl impl, service::FieldParams params)
 {
-	{ service::AwaitableObject<std::shared_ptr<UserQuery>> { impl.getUser(std::move(params)) } };
+	{ service::AwaitableObject<std::shared_ptr<UserPublic>> { impl.getUser(std::move(params)) } };
 };
 
 template <class TImpl>
 concept getUser = requires (TImpl impl)
 {
-	{ service::AwaitableObject<std::shared_ptr<UserQuery>> { impl.getUser() } };
+	{ service::AwaitableObject<std::shared_ptr<UserPublic>> { impl.getUser() } };
 };
 
 template <class TImpl>
@@ -37,19 +49,16 @@ concept endSelectionSet = requires (TImpl impl, const service::SelectionSetParam
 	{ impl.endSelectionSet(params) };
 };
 
-} // namespace methods::QueryHas
+} // namespace methods::AuthPayloadHas
 
-class [[nodiscard("unnecessary construction")]] Query final
+class [[nodiscard("unnecessary construction")]] AuthPayload final
 	: public service::Object
 {
 private:
+	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolveToken(service::ResolverParams&& params) const;
 	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolveUser(service::ResolverParams&& params) const;
 
 	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolve_typename(service::ResolverParams&& params) const;
-	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolve_schema(service::ResolverParams&& params) const;
-	[[nodiscard("unnecessary call")]] service::AwaitableResolver resolve_type(service::ResolverParams&& params) const;
-
-	std::shared_ptr<schema::Schema> _schema;
 
 	struct [[nodiscard("unnecessary construction")]] Concept
 	{
@@ -58,7 +67,8 @@ private:
 		virtual void beginSelectionSet(const service::SelectionSetParams& params) const = 0;
 		virtual void endSelectionSet(const service::SelectionSetParams& params) const = 0;
 
-		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<UserQuery>> getUser(service::FieldParams&& params) const = 0;
+		[[nodiscard("unnecessary call")]] virtual service::AwaitableScalar<std::string> getToken(service::FieldParams&& params) const = 0;
+		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<UserPublic>> getUser(service::FieldParams&& params) const = 0;
 	};
 
 	template <class T>
@@ -70,22 +80,35 @@ private:
 		{
 		}
 
-		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::shared_ptr<UserQuery>> getUser(service::FieldParams&& params) const override
+		[[nodiscard("unnecessary call")]] service::AwaitableScalar<std::string> getToken(service::FieldParams&& params) const override
 		{
-			if constexpr (methods::QueryHas::getUserWithParams<T>)
+			if constexpr (methods::AuthPayloadHas::getTokenWithParams<T>)
+			{
+				return { _pimpl->getToken(std::move(params)) };
+			}
+			else
+			{
+				static_assert(methods::AuthPayloadHas::getToken<T>, R"msg(AuthPayload::getToken is not implemented)msg");
+				return { _pimpl->getToken() };
+			}
+		}
+
+		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::shared_ptr<UserPublic>> getUser(service::FieldParams&& params) const override
+		{
+			if constexpr (methods::AuthPayloadHas::getUserWithParams<T>)
 			{
 				return { _pimpl->getUser(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::QueryHas::getUser<T>, R"msg(Query::getUser is not implemented)msg");
+				static_assert(methods::AuthPayloadHas::getUser<T>, R"msg(AuthPayload::getUser is not implemented)msg");
 				return { _pimpl->getUser() };
 			}
 		}
 
 		void beginSelectionSet(const service::SelectionSetParams& params) const override
 		{
-			if constexpr (methods::QueryHas::beginSelectionSet<T>)
+			if constexpr (methods::AuthPayloadHas::beginSelectionSet<T>)
 			{
 				_pimpl->beginSelectionSet(params);
 			}
@@ -93,7 +116,7 @@ private:
 
 		void endSelectionSet(const service::SelectionSetParams& params) const override
 		{
-			if constexpr (methods::QueryHas::endSelectionSet<T>)
+			if constexpr (methods::AuthPayloadHas::endSelectionSet<T>)
 			{
 				_pimpl->endSelectionSet(params);
 			}
@@ -103,7 +126,7 @@ private:
 		const std::shared_ptr<T> _pimpl;
 	};
 
-	explicit Query(std::unique_ptr<const Concept> pimpl) noexcept;
+	explicit AuthPayload(std::unique_ptr<const Concept> pimpl) noexcept;
 
 	[[nodiscard("unnecessary call")]] service::TypeNames getTypeNames() const noexcept;
 	[[nodiscard("unnecessary call")]] service::ResolverMap getResolvers() const noexcept;
@@ -115,17 +138,17 @@ private:
 
 public:
 	template <class T>
-	explicit Query(std::shared_ptr<T> pimpl) noexcept
-		: Query { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
+	explicit AuthPayload(std::shared_ptr<T> pimpl) noexcept
+		: AuthPayload { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
 	{
 	}
 
 	[[nodiscard("unnecessary call")]] static constexpr std::string_view getObjectType() noexcept
 	{
-		return { R"gql(Query)gql" };
+		return { R"gql(AuthPayload)gql" };
 	}
 };
 
 } // namespace graphql::user::object
 
-#endif // QUERYOBJECT_H
+#endif // AUTHPAYLOADOBJECT_H

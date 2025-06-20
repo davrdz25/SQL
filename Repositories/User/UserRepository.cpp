@@ -3,115 +3,142 @@
 
 UserRepository::UserRepository(std::shared_ptr<SQL> Database) : Database(std::move(Database)) {}
 
-std::optional<std::vector<UserModel>> UserRepository::ReadAll()
+DataTable UserRepository::ReadAll()
 {
     try
     {
         DataTable dataTable;
 
-        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, Phone, Email FROM Users";
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users";
 
-        dataTable.Fill(Database->FetchResults(sQuery));
+        dataTable = Database->FetchResults(sQuery);
 
-        if (dataTable.RowsCount() > 0)
-        {
-            std::vector<UserModel> users;
-
-            for (int i = 0; i < dataTable.RowsCount(); i++)
-            {
-                users.push_back(UserModel{
-                    std::stoi(dataTable[i]["UserEntry"]),
-                    dataTable[i]["UserCode"],
-                    dataTable[i]["FirstName"],
-                    dataTable[i]["MiddleName"],
-                    dataTable[i]["LastName"],
-                    dataTable[i]["Phone"]});
-            }
-
-            return users;
-        }
-
-        return std::nullopt;
+        return dataTable;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
     }
 };
 
-std::optional<UserModel> UserRepository::ReadByEntry(const int &iEntry)
+DataTable UserRepository::ReadByEntry(const int &iEntry)
 {
     try
     {
         DataTable dataTable;
 
-        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, Phone, Email FROM Users WHERE [Entry] = ?";
-        std::string sParam = std::to_string(iEntry);
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users WHERE [Entry] = ?";
 
-        dataTable.Fill(Database->FetchPrepared(sQuery, sParam));
+        dataTable = Database->FetchPrepared(sQuery, std::to_string(iEntry));
 
-        if (dataTable.RowsCount() == 1)
-        {
-            UserModel user;
-
-            user.Entry = std::stoi(dataTable[0]["UserEntry"]);
-            user.Code = dataTable[0]["UserCode"];
-            user.FirstName = dataTable[0]["FirstName"];
-            user.MiddleName = dataTable[0]["MiddleName"];
-            user.LastName = dataTable[0]["LastName"];
-            user.Phone = dataTable[0]["Phone"];
-
-            return user;
-        }
-
-        return std::nullopt;
+        return dataTable;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
     }
 };
 
-
-bool UserRepository::Create(const UserModel &uNewuser)
+bool UserRepository::Create(const CreateUserDTO &uNewuser)
 {
+    //TODO: Support NULL values 
     try
     {
+        Database->BeginTransaction();
+
+        GetCurrentSequence();
+
         std::vector<uint8_t> hashedPassword = Hasher::HashPassword(uNewuser.Password);
 
-        std::string sQuery = "INSERT INTO Users (UserEntry, UserCode, FirstName, MiddleName, LastName, Email, Phone, Password) "
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        std::string sQuery = "INSERT INTO Users (UserEntry, UserCode, FirstName, MiddleName, LastName, SecondLastName, Email, Phone, Password) "
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        std::vector<std::string> stringParams = {
-            std::to_string(uNewuser.Entry),
+        std::vector<std::optional<std::string>> stringParams = {
+            std::to_string(_UserEntry),
             uNewuser.Code,
             uNewuser.FirstName,
-            uNewuser.MiddleName,
+            uNewuser.MiddleName,   
             uNewuser.LastName,
+            uNewuser.SecondLastName,
             uNewuser.Email,
             uNewuser.Phone
-        }; 
+        };
 
         std::vector<std::vector<uint8_t>> binaryParams = {
             hashedPassword
         };
 
-        if (Database->RunPrepared(sQuery, stringParams, binaryParams))
-            return true;
+        if (!Database->RunPrepared(sQuery, stringParams, binaryParams))
+        {
+            Database->RollbackTransaction();
+            throw std::runtime_error("Error creating user");
+        }
 
-        return false;
+        if (!UpdateUserSequence())
+        {
+            Database->RollbackTransaction();
+            throw std::runtime_error("Error updating sequence");
+        }
+
+        Database->CommitTransaction();
+
+        return true;
     }
     catch (const std::exception &e)
     {
-        std::cerr << "[CreateUser Exception] " << e.what() << '\n';
-        throw std::runtime_error(e.what());
-        return false;
+        Database->RollbackTransaction();
+        throw std::runtime_error(std::string("[CreateUser Exception] ") + " " + e.what());        
     }
 }
 
-bool UserRepository::Update(const UserModel &)
+bool UserRepository::UpdateUserSequence()
+{
+    try
+    {
+        const std::string sQuery = "UPDATE Sequences SET User_Seq = User_Seq + 1";
+
+        if (Database->RunStatement(sQuery))
+            return true;
+    }
+    catch (const std::exception &e)
+    {
+        throw std::runtime_error(std::string("[UpdateUserSequence Exception] ") + " " + e.what());        
+    }
+};
+
+bool UserRepository::GetCurrentSequence()
+{
+    try
+    {
+        const std::string sQuery = "SELECT ISNULL(User_Seq, 0) + 1 User_Seq FROM Sequences";
+
+        DataTable data = Database->FetchResults(sQuery);
+
+        std::cout << "Sequence " << data[0]["User_Seq"].value() << std::endl;
+
+        if (data.RowsCount() == 1)
+            _UserEntry = std::stoi(data[0]["User_Seq"].value());
+    }
+    catch (const std::exception &e)
+    {
+        throw std::runtime_error(std::string("[GetCurrentSequence Exception] ") + " " + e.what());
+    }
+};
+
+
+bool UserRepository::Update(const UserDTO &)
+{
+    try
+    {
+        return false;
+    }
+    catch (const std::exception &e)
+    {
+        throw std::runtime_error(std::string("[GetCurrentSequence Exception] ") + " " + e.what());
+    }
+};
+
+bool UserRepository::Delete(const UserDTO &)
 {
     try
     {
@@ -124,81 +151,93 @@ bool UserRepository::Update(const UserModel &)
     }
 };
 
-bool UserRepository::Delete(const UserModel &)
+DataTable UserRepository::ReadByCode(const std::string &Code)
 {
     try
     {
-        return false;
+        DataTable dataTable;
+
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users WHERE UserCode = ?";
+
+        dataTable = Database->FetchPrepared(sQuery, Code);
+
+        return dataTable;
     }
     catch (const std::exception &e)
     {
-        std::cerr << e.what() << '\n';
-        return false;
+        throw std::runtime_error(std::string("[ReadByCode Exception] ") + " " + e.what());
     }
 };
 
-std::optional<std::vector<UserModel>> UserRepository::ReadByCode(const std::string)
+DataTable UserRepository::ReadByFirstName(const std::string &firstName)
 {
     try
     {
-        return std::nullopt;
+        DataTable dataTable;
+
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users WHERE FirstName = ?";
+
+        dataTable = Database->FetchPrepared(sQuery, firstName);
+
+        return dataTable;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
     }
 };
 
-std::optional<std::vector<UserModel>> UserRepository::ReadByFirstName(const std::string)
+DataTable UserRepository::ReadByLastName(const std::string &lastName)
 {
     try
     {
-        
+        DataTable dataTable;
+
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users WHERE LastName = ?";
+
+        dataTable = Database->FetchPrepared(sQuery, lastName);
+
+        return dataTable;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
     }
 };
 
-std::optional<std::vector<UserModel>> UserRepository::ReadByLastName(const std::string)
+DataTable UserRepository::ReadByPhone(const std::string &phone)
 {
     try
     {
-        
+        DataTable dataTable;
+
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users WHERE Phone = ?";
+
+        dataTable = Database->FetchPrepared(sQuery, phone);
+
+        return dataTable;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
     }
 };
 
-std::optional<std::vector<UserModel>> UserRepository::ReadByPhone(const std::string)
+DataTable UserRepository::ReadByEmail(const std::string &email)
 {
     try
     {
-        
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << '\n';
-        return std::nullopt;
-    }
-};
+        DataTable dataTable;
 
-std::optional<std::vector<UserModel>> UserRepository::ReadByEmail(const std::string)
-{
-    try
-    {
-        
+        std::string sQuery = "SELECT [UserEntry], UserCode, FirstName, MiddleName, LastName, SecondLastName, Phone, Email FROM Users WHERE Email = ?";
+
+        dataTable = Database->FetchPrepared(sQuery, email);
+
+        return dataTable;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
-        return std::nullopt;
     }
 };
 
@@ -209,16 +248,13 @@ bool UserRepository::UpdatePassword(const int &userEntry, const std::string &new
         const std::string sQuery = "UPDATE Users SET Password = ? WHERE UserEntry = ?";
         const std::vector<std::string> vParams = {
             std::to_string(userEntry),
-            newPassword
-        };
+            newPassword};
 
         return true;
-
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
         return false;
     }
-    
 };

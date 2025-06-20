@@ -63,6 +63,8 @@ set(GRAPHQL_RESOLVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GraphQL/Resolvers)
 
 set(GRAPHQL_GENERATED_SOURCES
     ${GRAPHQL_GENERATED_DIR}/User/UserObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/AuthPayloadObject.cpp
+    ${GRAPHQL_GENERATED_DIR}/User/UserPublicObject.cpp
     ${GRAPHQL_GENERATED_DIR}/User/UserSchema.cpp
     ${GRAPHQL_GENERATED_DIR}/User/QueryObject.cpp
     ${GRAPHQL_GENERATED_DIR}/User/MutationObject.cpp
@@ -81,7 +83,6 @@ file(GLOB_RECURSE PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Models/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
@@ -99,6 +100,7 @@ target_include_directories(GraphQLServer PRIVATE
     ${Boost_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils
     ${CMAKE_CURRENT_SOURCE_DIR}/Database
+    ${CMAKE_CURRENT_SOURCE_DIR}/DTOs
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
     ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
     ${CMAKE_CURRENT_SOURCE_DIR}/Services

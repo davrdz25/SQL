@@ -2,28 +2,31 @@
 
 #include "../../Interfaces/IUserRepository.hpp"
 #include "../../Database/SQL.hpp"
-#include "../../Database/DataTable.hpp"
 
 class UserRepository : public IUserRepository
 {
 private:
         std::shared_ptr<SQL> Database;
+        int _UserEntry;
 public:
     explicit UserRepository(std::shared_ptr<SQL> Database);
     ~UserRepository(){};
 
-    bool Create(const UserModel&) override;
-    bool Update(const UserModel&) override;
-    bool Delete(const UserModel&) override;
+    bool Create(const CreateUserDTO&) override;
+    bool Update(const UserDTO &) override;
+    bool Delete(const UserDTO &) override;
 
-    std::optional<std::vector<UserModel>>  ReadAll() override;
-    std::optional<UserModel> ReadByEntry(const int&) override;
+    DataTable ReadAll() override;
+    DataTable ReadByEntry(const int &) override;
+    DataTable ReadByCode(const std::string &) override;
+    DataTable ReadByFirstName(const std::string &) override;
+    DataTable ReadByLastName(const std::string &) override;
+    DataTable ReadByPhone(const std::string &) override;
+    DataTable ReadByEmail(const std::string &) override;
 
-    std::optional<std::vector<UserModel>> ReadByCode(const std::string) override;
-    std::optional<std::vector<UserModel>> ReadByFirstName(const std::string) override;
-    std::optional<std::vector<UserModel>> ReadByLastName(const std::string) override;
-    std::optional<std::vector<UserModel>> ReadByPhone(const std::string) override;
-    std::optional<std::vector<UserModel>> ReadByEmail(const std::string) override;
     bool UpdatePassword(const int &, const std::string &) override;
+    bool UpdateUserSequence() override;
+    bool GetCurrentSequence() override;
+
 
 };

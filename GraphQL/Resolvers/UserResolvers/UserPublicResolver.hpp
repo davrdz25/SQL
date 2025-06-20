@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Generated/User/UserObject.h"
+#include "../Generated/User/UserPublicObject.h"
 #include "../../Models/UserPublicModel.hpp"
 
-class UserResolver {
+class UserPublicResolver {
 public:
-    explicit UserResolver(const UserPublicModel& model)
+    explicit UserPublicResolver(const UserPublicModel& model)
         : m_model(model) {}
 
     graphql::service::AwaitableScalar<int> getEntry(graphql::service::FieldParams&&) const {
@@ -20,7 +20,7 @@ public:
         co_return m_model.FirstName;
     }
 
-     graphql::service::AwaitableScalar<std::optional<std::string>> getMiddleName(graphql::service::FieldParams&&) const {
+    graphql::service::AwaitableScalar<std::optional<std::string>> getMiddleName(graphql::service::FieldParams&&) const {
         co_return m_model.MiddleName;
     }
 

@@ -4,46 +4,97 @@ type User {
   FirstName: String!
   MiddleName: String
   LastName: String!
+  SecondLastName: String
+  Email: String!
+  Phone: String!
+  Password: String!
+}
+
+type UserPublic {
+  Entry: Int!
+  Code: String!
+  FirstName: String!
+  MiddleName: String
+  LastName: String!
+  SecondLastName: String
+  Email: String!
+  Phone: String!
+} 
+
+type AuthPayload {
+  token: String!
+  user: UserPublic!
+}
+
+input CreateUser {
+  Entry: Int!
+  Code: String!
+  FirstName: String!
+  MiddleName: String
+  LastName: String!
+  SecondLastName: String
   Email: String!
   Phone: String!
   Password: String!
 }
  
 input UserInput {
-  Code: String,
-  Email: String,
-  Phone: String,
+  Entry: Int!
+  Code: String!
+  FirstName: String
+  MiddleName: String
+  LastName: String
+  SecondLastName: String
+  Email: String
+  Phone: String
+}
+
+input UpdateUserInput {
+  Entry: Int!
+  Code: String!
+  FirstName: String
+  MiddleName: String
+  LastName: String
+  SecondLastName: String
+  Email: String
+  Phone: String
+}
+
+input ChangePasswordInput {
+  Entry: Int!
+  Code: String!
+  OldPassword: String!
+  NewPassword: String!
+}
+
+input CreateUserInput {
+  Code: String!,
+  FirstName: String!
+  MiddleName: String
+  LastName: String!
+  SecondLastName: String
+  Email: String!
+  Phone: String!,
   Password:String!
 }
 
-type Session {
-  Entry: Int!
-  SessionID: String!
-  User: User!
-  StartDate: Timestamp!
-  EndDate: Timestpam
-  Token: String
-}
-
-type SessionQuery {
-  GetAllSessions: [Session!]!
-  GetSessionsByDate: (StartDate: Timestamp!): [Session!]!
-  GetActiveSessions: [Session!]!
-}
-
-type SessionMutation {
-  CreateSession(User: UserInput!)
+input UserSession {
+  Code: String
+  Email: String
+  Phone: String
+  Password: String!
 }
 
 type UserQuery {
-  GetUser(Entry: Int!): User
-  GetUsers: [User!]!
+  GetUser(Entry: Int!): UserPublic
+  GetUsers(User: UserInput!): [UserPublic!]!
 }
 
 type UserMutation {
-  CreateUser(Code: String!, FirstName: String!, MiddleName: String, LastName: String!, Email: String!, Phone: String!, Password: String!): User
-  UpdateUser(Entry: Int!, FirstName: String, MiddleName: String, LastName: String, Email: String, Phone: String): User
-  ModifyPassword(Entry: Int!, OldPassword: String!, NewPassword: String!): Boolean
+  CreateUser(User: CreateUserInput!): UserPublic!
+  UpdateUser(User: UpdateUserInput!): UserPublic!
+  ModifyPassword(User: ChangePasswordInput!): Boolean!
+  LoginUser(User: UserSession!): AuthPayload!
 }
 
 type Query {

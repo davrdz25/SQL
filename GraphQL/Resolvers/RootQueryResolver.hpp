@@ -17,15 +17,9 @@ namespace graphql::resolvers
             : _userQ(std::move(userQ))
         {
         }
-
-        [[nodiscard]] graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::UserQuery>>
-        applyUser(graphql::service::FieldParams &&params) const
-        {
-            co_return std::make_shared<graphql::user::object::UserQuery>(_userQ);
-        }
-
-        [[nodiscard]] graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::UserQuery>>
-        getUser(graphql::service::FieldParams&& params) const 
+        
+        graphql::service::AwaitableObject<std::shared_ptr<graphql::user::object::UserQuery>>
+        getUser() const
         {
             co_return std::make_shared<graphql::user::object::UserQuery>(_userQ);
         }

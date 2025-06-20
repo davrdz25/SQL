@@ -16,25 +16,25 @@ namespace methods::UserQueryHas {
 template <class TImpl>
 concept getGetUserWithParams = requires (TImpl impl, service::FieldParams params, int EntryArg)
 {
-	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getGetUser(std::move(params), std::move(EntryArg)) } };
+	{ service::AwaitableObject<std::shared_ptr<UserPublic>> { impl.getGetUser(std::move(params), std::move(EntryArg)) } };
 };
 
 template <class TImpl>
 concept getGetUser = requires (TImpl impl, int EntryArg)
 {
-	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getGetUser(std::move(EntryArg)) } };
+	{ service::AwaitableObject<std::shared_ptr<UserPublic>> { impl.getGetUser(std::move(EntryArg)) } };
 };
 
 template <class TImpl>
-concept getGetUsersWithParams = requires (TImpl impl, service::FieldParams params)
+concept getGetUsersWithParams = requires (TImpl impl, service::FieldParams params, UserInput UserArg)
 {
-	{ service::AwaitableObject<std::vector<std::shared_ptr<User>>> { impl.getGetUsers(std::move(params)) } };
+	{ service::AwaitableObject<std::vector<std::shared_ptr<UserPublic>>> { impl.getGetUsers(std::move(params), std::move(UserArg)) } };
 };
 
 template <class TImpl>
-concept getGetUsers = requires (TImpl impl)
+concept getGetUsers = requires (TImpl impl, UserInput UserArg)
 {
-	{ service::AwaitableObject<std::vector<std::shared_ptr<User>>> { impl.getGetUsers() } };
+	{ service::AwaitableObject<std::vector<std::shared_ptr<UserPublic>>> { impl.getGetUsers(std::move(UserArg)) } };
 };
 
 template <class TImpl>
@@ -67,8 +67,8 @@ private:
 		virtual void beginSelectionSet(const service::SelectionSetParams& params) const = 0;
 		virtual void endSelectionSet(const service::SelectionSetParams& params) const = 0;
 
-		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<User>> getGetUser(service::FieldParams&& params, int&& EntryArg) const = 0;
-		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::vector<std::shared_ptr<User>>> getGetUsers(service::FieldParams&& params) const = 0;
+		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::shared_ptr<UserPublic>> getGetUser(service::FieldParams&& params, int&& EntryArg) const = 0;
+		[[nodiscard("unnecessary call")]] virtual service::AwaitableObject<std::vector<std::shared_ptr<UserPublic>>> getGetUsers(service::FieldParams&& params, UserInput&& UserArg) const = 0;
 	};
 
 	template <class T>
@@ -80,7 +80,7 @@ private:
 		{
 		}
 
-		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::shared_ptr<User>> getGetUser(service::FieldParams&& params, int&& EntryArg) const override
+		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::shared_ptr<UserPublic>> getGetUser(service::FieldParams&& params, int&& EntryArg) const override
 		{
 			if constexpr (methods::UserQueryHas::getGetUserWithParams<T>)
 			{
@@ -93,16 +93,16 @@ private:
 			}
 		}
 
-		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::vector<std::shared_ptr<User>>> getGetUsers(service::FieldParams&& params) const override
+		[[nodiscard("unnecessary call")]] service::AwaitableObject<std::vector<std::shared_ptr<UserPublic>>> getGetUsers(service::FieldParams&& params, UserInput&& UserArg) const override
 		{
 			if constexpr (methods::UserQueryHas::getGetUsersWithParams<T>)
 			{
-				return { _pimpl->getGetUsers(std::move(params)) };
+				return { _pimpl->getGetUsers(std::move(params), std::move(UserArg)) };
 			}
 			else
 			{
 				static_assert(methods::UserQueryHas::getGetUsers<T>, R"msg(UserQuery::getGetUsers is not implemented)msg");
-				return { _pimpl->getGetUsers() };
+				return { _pimpl->getGetUsers(std::move(UserArg)) };
 			}
 		}
 
